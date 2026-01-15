@@ -3,7 +3,6 @@ import { SummaryCards } from '@/components/dashboard/SummaryCards'
 import { ExpensesChart } from '@/components/dashboard/ExpensesChart'
 import { TopVehiclesTable } from '@/components/dashboard/TopVehiclesTable'
 import { RecentPendingList } from '@/components/dashboard/RecentPendingList'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { subMonths, startOfMonth, format, isAfter } from 'date-fns'
 
 export default async function DashboardPage() {
@@ -101,9 +100,9 @@ export default async function DashboardPage() {
 
   const formattedPending = recentPending?.map(p => ({
     id: p.id,
-    created_at: p.order_date,
-    amount: p.total_gross || 0,
-    error_reason: p.error_type || 'Unknown'
+    order_date: p.order_date,
+    total_gross: p.total_gross || 0,
+    error_type: p.error_type || 'Unknown'
   })) || []
 
 
@@ -120,21 +119,16 @@ export default async function DashboardPage() {
         activeAlertsCount={activeAlertsCount || 0}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <ExpensesChart data={expensesData} />
-        <RecentPendingList orders={formattedPending} />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <ExpensesChart data={expensesData} />
+        </div>
+        <div className="lg:col-span-1">
+          <RecentPendingList items={formattedPending} />
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Top 10 Pojazdów (Ten Miesiąc)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TopVehiclesTable vehicles={topVehicles} />
-          </CardContent>
-        </Card>
-      </div>
+      <TopVehiclesTable vehicles={topVehicles} />
     </div>
   )
 }
