@@ -1,65 +1,140 @@
-import Image from "next/image";
+import { createClient } from '@/utils/supabase/server'
+import { SummaryCards } from '@/components/dashboard/SummaryCards'
+import { ExpensesChart } from '@/components/dashboard/ExpensesChart'
+import { TopVehiclesTable } from '@/components/dashboard/TopVehiclesTable'
+import { RecentPendingList } from '@/components/dashboard/RecentPendingList'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { subMonths, startOfMonth, format, isAfter } from 'date-fns'
 
-export default function Home() {
+export default async function DashboardPage() {
+  const supabase = await createClient()
+
+  // 1. Fetch Summary Counts
+  const { count: vehicleCount } = await supabase
+    .from('vehicles')
+    .select('*', { count: 'estimated', head: true })
+    .eq('is_active', true)
+
+  const { count: pendingOrdersCount } = await supabase
+    .from('unresolved_pending_orders')
+    .select('*', { count: 'estimated', head: true })
+
+  const { count: activeAlertsCount } = await supabase
+    .from('budget_alerts')
+    .select('*', { count: 'estimated', head: true })
+    .eq('acknowledged', false)
+
+  // 2. Fetch Orders for calculations (Last 6 months)
+  const sixMonthsAgo = format(subMonths(new Date(), 6), 'yyyy-MM-dd')
+  const startOfCurrentMonth = format(startOfMonth(new Date()), 'yyyy-MM-dd')
+
+  const { data: orders } = await supabase
+    .from('orders')
+    .select('total_gross, order_date, vehicle_id, branch_code, branches(name), vehicles(plate_number, brand, model)')
+    .gte('order_date', sixMonthsAgo)
+
+  // Calculate Total Orders this month
+  const totalOrdersAmount = orders
+    ?.filter(o => o.order_date >= startOfCurrentMonth)
+    .reduce((sum, o) => sum + (o.total_gross || 0), 0) || 0
+
+  // Calculate Expenses Chart Data (Last 6 months)
+  const expensesMap = new Map<string, number>()
+  // Initialize last 6 months with 0
+  for (let i = 5; i >= 0; i--) {
+    const d = subMonths(new Date(), i)
+    expensesMap.set(format(d, 'MM/yyyy'), 0)
+  }
+
+  orders?.forEach(order => {
+    const monthKey = format(new Date(order.order_date), 'MM/yyyy')
+    if (expensesMap.has(monthKey)) {
+      expensesMap.set(monthKey, (expensesMap.get(monthKey) || 0) + (order.total_gross || 0))
+    }
+  })
+
+  const expensesData = Array.from(expensesMap.entries()).map(([month, amount]) => ({
+    month,
+    amount,
+  }))
+
+  // Calculate Top Vehicles (This Month)
+  const topVehiclesMap = new Map<string, any>()
+
+  orders
+    ?.filter(o => o.order_date >= startOfCurrentMonth && o.vehicle_id)
+    .forEach(order => {
+      // Supabase join types might be arrays depending on relationship definition
+      const vData = Array.isArray(order.vehicles) ? order.vehicles[0] : order.vehicles
+      const bData = Array.isArray(order.branches) ? order.branches[0] : order.branches
+
+      const plate = vData?.plate_number || 'Unknown'
+      const vehicleId = order.vehicle_id
+
+      if (!topVehiclesMap.has(plate)) {
+        topVehiclesMap.set(plate, {
+          id: vehicleId,
+          plate_number: plate,
+          brand: vData?.brand || '',
+          model: vData?.model || '',
+          branch_name: bData?.name || order.branch_code || 'Brak',
+          total_spent: 0,
+          order_count: 0
+        })
+      }
+      const v = topVehiclesMap.get(plate)
+      v.total_spent += order.total_gross || 0
+      v.order_count += 1
+    })
+
+  const topVehicles = Array.from(topVehiclesMap.values())
+    .sort((a, b) => b.total_spent - a.total_spent)
+    .slice(0, 10)
+
+
+  // 3. Fetch Recent Pending List
+  const { data: recentPending } = await supabase
+    .from('unresolved_pending_orders')
+    .select('id, order_date, error_type, total_gross')
+    .order('order_date', { ascending: false })
+    .limit(5)
+
+  const formattedPending = recentPending?.map(p => ({
+    id: p.id,
+    created_at: p.order_date,
+    amount: p.total_gross || 0,
+    error_reason: p.error_type || 'Unknown'
+  })) || []
+
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="flex-1 space-y-4">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      </div>
+
+      <SummaryCards
+        vehicleCount={vehicleCount || 0}
+        totalOrdersAmount={totalOrdersAmount}
+        pendingOrdersCount={pendingOrdersCount || 0}
+        activeAlertsCount={activeAlertsCount || 0}
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <ExpensesChart data={expensesData} />
+        <RecentPendingList orders={formattedPending} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Top 10 Pojazdów (Ten Miesiąc)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TopVehiclesTable vehicles={topVehicles} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
