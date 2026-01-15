@@ -57,7 +57,7 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
                             padding: '12px 16px'
                         }}
                         labelStyle={{ color: '#1e293b', fontWeight: 'bold', marginBottom: '4px' }}
-                        formatter={(value: number) => [`${value.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} zł`, 'Kwota']}
+                        formatter={(value) => [`${(value ?? 0).toLocaleString('pl-PL', { minimumFractionDigits: 2 })} zł`, 'Kwota']}
                     />
                     <Area
                         type="monotone"
