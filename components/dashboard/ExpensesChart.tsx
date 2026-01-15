@@ -11,20 +11,20 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
     const totalAmount = data.reduce((sum, item) => sum + item.amount, 0)
 
     return (
-        <div className="rounded-2xl bg-gradient-to-br from-white/80 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg shadow-purple-500/5 p-6 transition-all duration-300 hover:shadow-xl">
-            <div className="flex items-center justify-between mb-6">
+        <div className="rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg shadow-purple-500/5 p-4 md:p-6 transition-all duration-300 hover:shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 md:mb-6">
                 <div>
                     <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                         Wydatki na części
                     </h3>
                     <p className="text-sm text-slate-500">Ostatnie 6 miesięcy</p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-sm font-medium">
+                <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-2 py-1 md:px-3 md:py-1.5 rounded-full text-xs md:text-sm font-medium self-start sm:self-auto">
                     <TrendingUp className="h-4 w-4" />
                     {totalAmount.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} zł
                 </div>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={200} className="md:!h-[280px]">
                 <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">

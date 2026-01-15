@@ -55,12 +55,12 @@ export function SummaryCards({
     ]
 
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             {cards.map((card, index) => (
                 <div
                     key={card.title}
                     className={`
-                        relative overflow-hidden rounded-2xl p-6
+                        relative overflow-hidden rounded-xl md:rounded-2xl p-4 md:p-6
                         bg-gradient-to-br ${card.bgGradient}
                         border border-white/50 backdrop-blur-sm
                         shadow-lg shadow-slate-200/50

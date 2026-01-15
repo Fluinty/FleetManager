@@ -33,9 +33,10 @@ interface PendingResolverProps {
     orderId: string
     initialPlate?: string | null
     vehicles: VehicleOption[]
+    fullWidth?: boolean
 }
 
-export function PendingResolver({ orderId, initialPlate, vehicles }: PendingResolverProps) {
+export function PendingResolver({ orderId, initialPlate, vehicles, fullWidth = false }: PendingResolverProps) {
     const [open, setOpen] = useState(false)
     const [plate, setPlate] = useState(initialPlate || "")
     const [loading, setLoading] = useState(false)
@@ -75,7 +76,13 @@ export function PendingResolver({ orderId, initialPlate, vehicles }: PendingReso
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">Rozwiąż</Button>
+                <Button
+                    variant={fullWidth ? "default" : "outline"}
+                    size={fullWidth ? "default" : "sm"}
+                    className={fullWidth ? "w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-md" : ""}
+                >
+                    {fullWidth ? "Przypisz pojazd" : "Rozwiąż"}
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

@@ -11,7 +11,7 @@ import {
 import { formatCurrency, formatDate } from "@/utils/format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
+import { ChevronDown, ChevronUp, ArrowUpDown, ShoppingCart, Calendar, Car } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -66,8 +66,103 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
         router.push(`?${params.toString()}`)
     }
 
-    return (
-        <div className="rounded-md border bg-card text-card-foreground">
+    // Mobile Card View
+    const MobileCards = () => (
+        <div className="space-y-3 md:hidden">
+            {orders.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                    Brak zamówień spełniających kryteria.
+                </div>
+            ) : (
+                orders.map((order) => {
+                    const branchName = Array.isArray(order.branches)
+                        ? order.branches[0]?.name
+                        : order.branches?.name
+                    const plate = Array.isArray(order.vehicles)
+                        ? order.vehicles[0]?.plate_number
+                        : order.vehicles?.plate_number
+                    const isExpanded = expandedRows.has(order.id)
+
+                    return (
+                        <div
+                            key={order.id}
+                            className="rounded-xl bg-white/80 border border-white/50 shadow-sm overflow-hidden"
+                        >
+                            <button
+                                onClick={() => toggleRow(order.id)}
+                                className="w-full p-4 text-left hover:bg-slate-50/50 transition-colors"
+                            >
+                                <div className="flex items-start justify-between mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                            <ShoppingCart className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-lg text-emerald-600">
+                                                {formatCurrency(order.total_gross)}
+                                            </p>
+                                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                {formatDate(order.order_date)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant={order.status === 'MATCHED' ? 'default' : 'secondary'} className="text-xs">
+                                            {order.status}
+                                        </Badge>
+                                        {isExpanded ? <ChevronUp className="h-5 w-5 text-slate-400" /> : <ChevronDown className="h-5 w-5 text-slate-400" />}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {plate && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                            <Car className="h-3 w-3" /> {plate}
+                                        </span>
+                                    )}
+                                    {branchName && (
+                                        <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs">
+                                            {branchName}
+                                        </span>
+                                    )}
+                                    {order.intercars_id && (
+                                        <span className="px-2 py-1 rounded-full bg-purple-100 text-purple-700 text-xs">
+                                            #{order.intercars_id}
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+
+                            {isExpanded && order.order_items && order.order_items.length > 0 && (
+                                <div className="border-t border-slate-100 bg-slate-50/50 p-4">
+                                    <p className="text-xs font-semibold text-slate-500 mb-2">Pozycje zamówienia:</p>
+                                    <div className="space-y-2">
+                                        {order.order_items.map((item) => (
+                                            <div key={item.id} className="flex justify-between text-sm">
+                                                <div className="flex-1 pr-2">
+                                                    <p className="font-medium text-slate-700 truncate">{item.name}</p>
+                                                    {item.sku && <p className="text-xs text-slate-400">{item.sku}</p>}
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-medium">{item.required_quantity}x</p>
+                                                    <p className="text-xs text-slate-500">{formatCurrency(item.total_net || 0)}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )
+                })
+            )}
+        </div>
+    )
+
+    // Desktop Table View
+    const DesktopTable = () => (
+        <div className="hidden md:block rounded-md border bg-card text-card-foreground">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -168,5 +263,12 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                 </TableBody>
             </Table>
         </div>
+    )
+
+    return (
+        <>
+            <MobileCards />
+            <DesktopTable />
+        </>
     )
 }

@@ -13,7 +13,7 @@ import { differenceInDays, parseISO } from "date-fns"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Car, Calendar, Shield, ChevronRight } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 interface Vehicle {
@@ -26,7 +26,7 @@ interface Vehicle {
     next_inspection_date: string | null
     next_insurance_date: string | null
     is_active: boolean | null
-    branches?: { name: string } | { name: string }[] | null // Handle array or object
+    branches?: { name: string } | { name: string }[] | null
 }
 
 export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
@@ -50,14 +50,93 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
     const getExpiryColor = (dateStr: string | null) => {
         if (!dateStr) return ""
         const days = differenceInDays(parseISO(dateStr), new Date())
-        if (days < 0) return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" // Expired
-        if (days < 30) return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800"
-        if (days < 60) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800"
-        return "text-gray-600 dark:text-gray-400"
+        if (days < 0) return "bg-red-100 text-red-700 border-red-200"
+        if (days < 30) return "bg-orange-100 text-orange-700 border-orange-200"
+        if (days < 60) return "bg-yellow-100 text-yellow-700 border-yellow-200"
+        return "text-gray-600"
     }
 
-    return (
-        <div className="rounded-md border bg-card text-card-foreground">
+    const getExpiryBadgeColor = (dateStr: string | null) => {
+        if (!dateStr) return "bg-gray-100 text-gray-500"
+        const days = differenceInDays(parseISO(dateStr), new Date())
+        if (days < 0) return "bg-red-100 text-red-700"
+        if (days < 30) return "bg-orange-100 text-orange-700"
+        if (days < 60) return "bg-yellow-100 text-yellow-700"
+        return "bg-green-100 text-green-700"
+    }
+
+    // Mobile Card View
+    const MobileCards = () => (
+        <div className="space-y-3 md:hidden">
+            {vehicles.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                    Brak pojazdów spełniających kryteria.
+                </div>
+            ) : (
+                vehicles.map((vehicle) => {
+                    const branchName = Array.isArray(vehicle.branches)
+                        ? vehicle.branches[0]?.name
+                        : vehicle.branches?.name
+
+                    return (
+                        <Link
+                            key={vehicle.id}
+                            href={`/vehicles/${vehicle.id}`}
+                            className={cn(
+                                "block p-4 rounded-xl bg-white/80 border border-white/50 shadow-sm hover:shadow-md transition-all",
+                                !vehicle.is_active && "opacity-60"
+                            )}
+                        >
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                                        <Car className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-800">{vehicle.plate_number}</p>
+                                        <p className="text-sm text-slate-500">
+                                            {vehicle.brand} {vehicle.model}
+                                            {vehicle.production_year && ` (${vehicle.production_year})`}
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-slate-400" />
+                            </div>
+
+                            {branchName && (
+                                <div className="mb-3">
+                                    <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
+                                        {branchName}
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className={cn(
+                                    "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs",
+                                    getExpiryBadgeColor(vehicle.next_inspection_date)
+                                )}>
+                                    <Calendar className="h-3.5 w-3.5" />
+                                    <span>Przegląd: {formatDate(vehicle.next_inspection_date)}</span>
+                                </div>
+                                <div className={cn(
+                                    "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs",
+                                    getExpiryBadgeColor(vehicle.next_insurance_date)
+                                )}>
+                                    <Shield className="h-3.5 w-3.5" />
+                                    <span>OC: {formatDate(vehicle.next_insurance_date)}</span>
+                                </div>
+                            </div>
+                        </Link>
+                    )
+                })
+            )}
+        </div>
+    )
+
+    // Desktop Table View
+    const DesktopTable = () => (
+        <div className="hidden md:block rounded-md border bg-card text-card-foreground">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -97,7 +176,7 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                                 : vehicle.branches?.name
 
                             return (
-                                <TableRow key={vehicle.id} className={cn(!vehicle.is_active && "text-gray-500 bg-gray-50 dark:bg-gray-900/50")}>
+                                <TableRow key={vehicle.id} className={cn(!vehicle.is_active && "text-gray-500 bg-gray-50")}>
                                     <TableCell className="font-medium">{vehicle.plate_number}</TableCell>
                                     <TableCell>{vehicle.brand}</TableCell>
                                     <TableCell>{vehicle.model}</TableCell>
@@ -105,7 +184,7 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                                     <TableCell>{branchName}</TableCell>
                                     <TableCell>
                                         <div className={cn(
-                                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border border-transparent",
+                                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border border-transparent",
                                             getExpiryColor(vehicle.next_inspection_date)
                                         )}>
                                             {formatDate(vehicle.next_inspection_date)}
@@ -113,7 +192,7 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                                     </TableCell>
                                     <TableCell>
                                         <div className={cn(
-                                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border border-transparent",
+                                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border border-transparent",
                                             getExpiryColor(vehicle.next_insurance_date)
                                         )}>
                                             {formatDate(vehicle.next_insurance_date)}
@@ -131,5 +210,12 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                 </TableBody>
             </Table>
         </div>
+    )
+
+    return (
+        <>
+            <MobileCards />
+            <DesktopTable />
+        </>
     )
 }

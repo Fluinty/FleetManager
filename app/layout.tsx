@@ -24,8 +24,9 @@ export default function RootLayout({
       <body className={`${inter.className} h-full overflow-hidden`}>
         <div className="flex h-full">
           <Sidebar />
-          <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="glass rounded-2xl min-h-full p-6 md:p-8">
+          {/* Main content - add top padding on mobile for fixed header */}
+          <main className="flex-1 overflow-y-auto p-4 pt-20 md:p-6 md:pt-6 lg:p-8">
+            <div className="glass rounded-2xl min-h-full p-4 md:p-6 lg:p-8">
               {children}
             </div>
           </main>
