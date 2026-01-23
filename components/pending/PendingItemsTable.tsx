@@ -71,13 +71,13 @@ function OrderItemsGroup({
     const [expanded, setExpanded] = useState(items.length <= 3)
 
     return (
-        <div className="rounded-xl bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg overflow-hidden">
+        <div className="rounded-xl bg-gradient-to-br from-white/90 to-teal-50/50 backdrop-blur-xl border border-white/50 shadow-lg overflow-hidden">
             {/* Order Header */}
-            <div className="p-4 border-b border-purple-100/50 bg-gradient-to-r from-purple-50/50 to-transparent">
+            <div className="p-4 border-b border-teal-100/50 bg-gradient-to-r from-teal-50/50 to-transparent">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <Calendar className="h-4 w-4 text-purple-500" />
+                            <Calendar className="h-4 w-4 text-teal-500" />
                             <span className="font-medium">{formatDate(order.order_date)}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -108,11 +108,11 @@ function OrderItemsGroup({
             </div>
 
             {/* Items List */}
-            <div className="divide-y divide-purple-100/30">
+            <div className="divide-y divide-teal-100/30">
                 {(expanded ? items : items.slice(0, 2)).map((item) => (
-                    <div key={item.item_id} className="p-3 flex items-center justify-between gap-3 hover:bg-purple-50/30 transition-colors">
+                    <div key={item.item_id} className="p-3 flex items-center justify-between gap-3 hover:bg-teal-50/30 transition-colors">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <Package className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                            <Package className="h-4 w-4 text-teal-400 flex-shrink-0" />
                             <div className="min-w-0">
                                 <p className="text-sm font-medium text-slate-700 truncate">
                                     {item.item_name || 'Brak nazwy'}
@@ -144,7 +144,7 @@ function OrderItemsGroup({
                 {items.length > 2 && !expanded && (
                     <Button
                         variant="ghost"
-                        className="w-full py-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        className="w-full py-2 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
                         onClick={() => setExpanded(true)}
                     >
                         <ChevronDown className="h-4 w-4 mr-1" />
@@ -155,7 +155,7 @@ function OrderItemsGroup({
                 {items.length > 3 && expanded && (
                     <Button
                         variant="ghost"
-                        className="w-full py-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        className="w-full py-2 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
                         onClick={() => setExpanded(false)}
                     >
                         <ChevronUp className="h-4 w-4 mr-1" />
@@ -170,7 +170,7 @@ function OrderItemsGroup({
 export function PendingItemsTable({ items, vehicles }: { items: PendingItem[], vehicles: VehicleOption[] }) {
     if (items.length === 0) {
         return (
-            <div className="rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg p-8 text-center">
+            <div className="rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-teal-50/50 backdrop-blur-xl border border-white/50 shadow-lg p-8 text-center">
                 <p className="text-slate-500">Brak pozycji wymagających weryfikacji.</p>
             </div>
         )
@@ -193,7 +193,7 @@ export function PendingItemsTable({ items, vehicles }: { items: PendingItem[], v
             </div>
 
             {/* Desktop: Table Layout */}
-            <div className="hidden lg:block rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg overflow-hidden">
+            <div className="hidden lg:block rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-teal-50/50 backdrop-blur-xl border border-white/50 shadow-lg overflow-hidden">
                 <Table>
                     <TableHeader>
                         <TableRow>

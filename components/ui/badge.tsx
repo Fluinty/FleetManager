@@ -9,7 +9,7 @@ const badgeVariants = cva(
         variants: {
             variant: {
                 default:
-                    "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm shadow-purple-300/50",
+                    "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-sm shadow-teal-300/50",
                 secondary:
                     "bg-slate-100 text-slate-700 hover:bg-slate-200",
                 destructive:
@@ -19,7 +19,7 @@ const badgeVariants = cva(
                 warning:
                     "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm shadow-amber-300/50",
                 outline:
-                    "border-2 border-purple-200 text-purple-700 bg-white/50 backdrop-blur-sm",
+                    "border-2 border-teal-200 text-teal-700 bg-white/50 backdrop-blur-sm",
             },
         },
         defaultVariants: {

@@ -19,10 +19,10 @@ const SelectTrigger = React.forwardRef<
     <SelectPrimitive.Trigger
         ref={ref}
         className={cn(
-            "flex h-11 w-full items-center justify-between rounded-xl border-2 border-purple-100 bg-white/80 backdrop-blur-sm px-4 py-2 text-base text-slate-700",
+            "flex h-11 w-full items-center justify-between rounded-xl border-2 border-teal-100 bg-white/80 backdrop-blur-sm px-4 py-2 text-base text-slate-700",
             "placeholder:text-slate-400",
-            "focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100",
-            "hover:border-purple-200",
+            "focus:border-teal-400 focus:outline-none focus:ring-4 focus:ring-teal-100",
+            "hover:border-teal-200",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "transition-all duration-300",
             "[&>span]:line-clamp-1",
@@ -81,7 +81,7 @@ const SelectContent = React.forwardRef<
         <SelectPrimitive.Content
             ref={ref}
             className={cn(
-                "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl bg-white/95 backdrop-blur-xl border border-purple-100 shadow-xl shadow-purple-500/10",
+                "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl bg-white/95 backdrop-blur-xl border border-teal-100 shadow-xl shadow-teal-500/10",
                 "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
                 position === "popper" &&
                 "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
@@ -126,8 +126,8 @@ const SelectItem = React.forwardRef<
         ref={ref}
         className={cn(
             "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-2 text-sm text-slate-700 outline-none",
-            "hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50",
-            "focus:bg-gradient-to-r focus:from-purple-50 focus:to-pink-50",
+            "hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50",
+            "focus:bg-gradient-to-r focus:from-teal-50 focus:to-cyan-50",
             "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
             "transition-colors duration-200",
             className
@@ -136,7 +136,7 @@ const SelectItem = React.forwardRef<
     >
         <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
             <SelectPrimitive.ItemIndicator>
-                <Check className="h-4 w-4 text-purple-600" />
+                <Check className="h-4 w-4 text-teal-600" />
             </SelectPrimitive.ItemIndicator>
         </span>
 
@@ -151,7 +151,7 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SelectPrimitive.Separator
         ref={ref}
-        className={cn("-mx-1 my-1 h-px bg-purple-100", className)}
+        className={cn("-mx-1 my-1 h-px bg-teal-100", className)}
         {...props}
     />
 ))

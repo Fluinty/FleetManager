@@ -79,7 +79,7 @@ export function PendingResolver({ orderId, initialPlate, vehicles, fullWidth = f
                 <Button
                     variant={fullWidth ? "default" : "outline"}
                     size={fullWidth ? "default" : "sm"}
-                    className={fullWidth ? "w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-md" : ""}
+                    className={fullWidth ? "w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold shadow-md" : ""}
                 >
                     {fullWidth ? "Przypisz pojazd" : "Rozwiąż"}
                 </Button>

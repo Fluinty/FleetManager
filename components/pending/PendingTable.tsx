@@ -30,7 +30,7 @@ interface VehicleOption {
 export function PendingTable({ items, vehicles }: { items: PendingItem[], vehicles: VehicleOption[] }) {
     if (items.length === 0) {
         return (
-            <div className="rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg p-8 text-center">
+            <div className="rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-teal-50/50 backdrop-blur-xl border border-white/50 shadow-lg p-8 text-center">
                 <p className="text-slate-500">Brak zamówień wymagających weryfikacji.</p>
             </div>
         )
@@ -43,12 +43,12 @@ export function PendingTable({ items, vehicles }: { items: PendingItem[], vehicl
                 {items.map((item) => (
                     <div
                         key={item.id}
-                        className="rounded-xl bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg p-4 space-y-3"
+                        className="rounded-xl bg-gradient-to-br from-white/90 to-teal-50/50 backdrop-blur-xl border border-white/50 shadow-lg p-4 space-y-3"
                     >
                         {/* Header with date and order number */}
                         <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 text-sm text-slate-600">
-                                <Calendar className="h-4 w-4 text-purple-500" />
+                                <Calendar className="h-4 w-4 text-teal-500" />
                                 <span className="font-medium">{formatDate(item.order_date)}</span>
                             </div>
                             <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold flex items-center gap-1">
@@ -87,7 +87,7 @@ export function PendingTable({ items, vehicles }: { items: PendingItem[], vehicl
             </div>
 
             {/* Desktop Table Layout */}
-            <div className="hidden md:block rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-purple-50/50 backdrop-blur-xl border border-white/50 shadow-lg overflow-hidden">
+            <div className="hidden md:block rounded-xl md:rounded-2xl bg-gradient-to-br from-white/80 to-teal-50/50 backdrop-blur-xl border border-white/50 shadow-lg overflow-hidden">
                 <Table>
                     <TableHeader>
                         <TableRow>

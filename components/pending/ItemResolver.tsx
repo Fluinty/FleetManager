@@ -108,7 +108,7 @@ export function ItemResolver({
                 <Button
                     variant={fullWidth ? "default" : "outline"}
                     size={fullWidth ? "default" : "sm"}
-                    className={fullWidth ? "w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-md" : ""}
+                    className={fullWidth ? "w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-semibold shadow-md" : ""}
                 >
                     <Car className="h-4 w-4 mr-1" />
                     {fullWidth ? "Przypisz pojazd" : "Przypisz"}
@@ -117,7 +117,7 @@ export function ItemResolver({
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Package className="h-5 w-5 text-purple-500" />
+                        <Package className="h-5 w-5 text-teal-500" />
                         Przypisz pojazd do pozycji
                     </DialogTitle>
                     <DialogDescription>
@@ -151,7 +151,7 @@ export function ItemResolver({
                         </div>
 
                         {hasMultipleItems && (
-                            <div className="flex items-center space-x-2 px-4 py-3 bg-purple-50 rounded-lg border border-purple-100">
+                            <div className="flex items-center space-x-2 px-4 py-3 bg-teal-50 rounded-lg border border-teal-100">
                                 <Checkbox
                                     id="applyToAll"
                                     checked={applyToAll}

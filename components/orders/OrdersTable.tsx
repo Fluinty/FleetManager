@@ -127,7 +127,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                         </span>
                                     )}
                                     {order.intercars_id && (
-                                        <span className="px-2 py-1 rounded-full bg-purple-100 text-purple-700 text-xs">
+                                        <span className="px-2 py-1 rounded-full bg-teal-100 text-teal-700 text-xs">
                                             #{order.intercars_id}
                                         </span>
                                     )}

@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { SummaryCards } from '@/components/dashboard/SummaryCards'
 import { ExpensesChart } from '@/components/dashboard/ExpensesChart'
 import { TopVehiclesTable } from '@/components/dashboard/TopVehiclesTable'
-import { RecentPendingList } from '@/components/dashboard/RecentPendingList'
+import { RecentPendingItems } from '@/components/dashboard/RecentPendingItems'
 import { subMonths, startOfMonth, format, isAfter } from 'date-fns'
 
 export default async function DashboardPage() {
@@ -17,6 +17,15 @@ export default async function DashboardPage() {
   const { count: pendingOrdersCount } = await supabase
     .from('unresolved_pending_orders')
     .select('*', { count: 'estimated', head: true })
+
+
+
+  // Active vehicles for dropdown
+  const { data: activeVehicles } = await supabase
+    .from('vehicles')
+    .select('id, plate_number')
+    .eq('is_active', true)
+    .order('plate_number', { ascending: true })
 
   const { count: activeAlertsCount } = await supabase
     .from('budget_alerts')
@@ -91,19 +100,12 @@ export default async function DashboardPage() {
     .slice(0, 10)
 
 
-  // 3. Fetch Recent Pending List
-  const { data: recentPending } = await supabase
-    .from('unresolved_pending_orders')
-    .select('id, order_date, error_type, total_gross')
+  // 3. Fetch Recent Pending Items
+  const { data: recentPendingItems } = await supabase
+    .from('unresolved_pending_items')
+    .select('*')
     .order('order_date', { ascending: false })
     .limit(5)
-
-  const formattedPending = recentPending?.map(p => ({
-    id: p.id,
-    order_date: p.order_date,
-    total_gross: p.total_gross || 0,
-    error_type: p.error_type || 'Unknown'
-  })) || []
 
 
   return (
@@ -122,7 +124,7 @@ export default async function DashboardPage() {
           <ExpensesChart data={expensesData} />
         </div>
         <div className="lg:col-span-1">
-          <RecentPendingList items={formattedPending} />
+          <RecentPendingItems items={recentPendingItems || []} vehicles={activeVehicles || []} />
         </div>
       </div>
 

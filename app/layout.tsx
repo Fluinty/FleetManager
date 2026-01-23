@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,9 +9,14 @@ const inter = Inter({
   variable: "--font-inter"
 });
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk"
+});
+
 export const metadata: Metadata = {
-  title: "Art-Tim Fleet Manager",
-  description: "Fleet management dashboard for Art-Tim",
+  title: "Fleet Manager by Fluinty",
+  description: "Fleet management dashboard powered by Fluinty",
 };
 
 export default function RootLayout({
@@ -21,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pl" className="h-full">
-      <body className={`${inter.className} h-full overflow-hidden`}>
+      <body className={`${inter.className} ${spaceGrotesk.variable} h-full overflow-hidden`}>
         <div className="flex h-full">
           <Sidebar />
           {/* Main content - add top padding on mobile for fixed header */}
