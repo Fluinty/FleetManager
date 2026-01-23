@@ -53,9 +53,10 @@ A dashboard that:
 
 **Priority Feature** - Daily operational workflow for fleet managers.
 
-- View orders missing valid vehicle plates
+- View **order items** missing valid vehicle plates (grouped by order)
 - See original comment and AI-extracted plate (if invalid)
-- Quick assignment via vehicle dropdown + plate input
+- **Per-item assignment** via vehicle dropdown
+- **Bulk assignment** option to assign all items in an order at once
 - Resolution tracking (who resolved, when)
 - Filter by error type (missing/invalid)
 
@@ -246,6 +247,7 @@ erDiagram
     order_items {
         uuid id PK
         uuid order_id FK
+        uuid vehicle_id FK
         text name
         text sku
         text index_number
@@ -254,6 +256,11 @@ erDiagram
         decimal unit_price_gross
         decimal total_net
         decimal total_gross
+        text plate_extraction_status
+        text extracted_plate
+        boolean resolved
+        timestamp resolved_at
+        text resolved_by
     }
 
     pending_orders {
@@ -299,11 +306,14 @@ erDiagram
 
 | View                       | Purpose                                |
 | -------------------------- | -------------------------------------- |
-| `vehicle_monthly_spending` | Monthly spending aggregated by vehicle |
-| `unresolved_pending_orders`| Pending queue with joined order data  |
+| `vehicle_monthly_spending` | Monthly spending aggregated by vehicle (from order_items) |
+| `unresolved_pending_items` | **NEW** - Items requiring plate verification |
+| `unresolved_pending_orders`| Orders with pending items (backward compat) |
 | `vehicles_over_budget`     | Vehicles exceeding monthly limit       |
 | `branch_statistics`        | Per-branch summary metrics             |
 | `vehicle_order_history`    | Last 12 months orders with details     |
+
+> **Note**: Vehicle spending is now tracked at the **order item level**. Each item can be assigned to a different vehicle. If `order_items.vehicle_id` is NULL, it inherits from `orders.vehicle_id`.
 
 ---
 
@@ -317,6 +327,7 @@ art-tim/
 │   ├── globals.css           # Global styles + glassmorphism
 │   ├── actions/              # Server actions
 │   │   ├── resolve-pending.ts
+│   │   ├── resolve-pending-item.ts  # Item-level plate resolution
 │   │   ├── check-budget.ts
 │   │   ├── acknowledge-alert.ts
 │   │   └── settings.ts
@@ -464,7 +475,7 @@ npx supabase gen types typescript --project-id bsqibeirdfjdphpyqnlx > types/supa
 
 ## 13. Key Workflows
 
-### Pending Order Resolution
+### Pending Item Resolution
 
 ```mermaid
 sequenceDiagram
@@ -473,12 +484,20 @@ sequenceDiagram
     participant SA as Server Action
     participant DB as Supabase
 
-    U->>UI: Enter plate number
-    UI->>SA: resolvePendingOrder(orderId, plate)
-    SA->>DB: Find vehicle by plate
-    DB-->>SA: Vehicle found
-    SA->>DB: Update order with vehicle_id
-    SA->>DB: Mark as resolved
+    U->>UI: Select vehicle for item(s)
+    alt Single Item
+        UI->>SA: resolvePendingItem(itemId, plate)
+        SA->>DB: Find vehicle by plate
+        DB-->>SA: Vehicle found
+        SA->>DB: Update order_item with vehicle_id
+        SA->>DB: Mark item as resolved
+    else Bulk (All Items in Order)
+        UI->>SA: resolvePendingOrderItems(orderId, plate)
+        SA->>DB: Find vehicle by plate
+        DB-->>SA: Vehicle found
+        SA->>DB: Update all order_items with vehicle_id
+        SA->>DB: Update order with vehicle_id (compat)
+    end
     SA-->>UI: Success
     UI-->>U: Toast notification
 ```

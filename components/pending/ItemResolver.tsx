@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -53,6 +54,7 @@ export function ItemResolver({
     vehicles,
     fullWidth = false
 }: ItemResolverProps) {
+    const router = useRouter()
     const [open, setOpen] = useState(false)
     const [plate, setPlate] = useState("")
     const [applyToAll, setApplyToAll] = useState(false)
@@ -90,6 +92,8 @@ export function ItemResolver({
                         ? `Przypisano ${allItems.length} pozycji do pojazdu.`
                         : "Pozycja została przypisana do pojazdu.",
                 })
+                // Refresh page to re-fetch data and remove resolved item from list
+                router.refresh()
             }
         } catch {
             setError("Wystąpił nieoczekiwany błąd.")
