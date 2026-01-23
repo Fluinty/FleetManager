@@ -301,6 +301,12 @@ export type Database = {
                     delivery_ids: string[] | null
                     category: string | null
                     created_at: string | null
+                    vehicle_id: string | null
+                    plate_extraction_status: string | null
+                    extracted_plate: string | null
+                    resolved: boolean | null
+                    resolved_at: string | null
+                    resolved_by: string | null
                 }
                 Insert: {
                     id?: string
@@ -322,6 +328,12 @@ export type Database = {
                     delivery_ids?: string[] | null
                     category?: string | null
                     created_at?: string | null
+                    vehicle_id?: string | null
+                    plate_extraction_status?: string | null
+                    extracted_plate?: string | null
+                    resolved?: boolean | null
+                    resolved_at?: string | null
+                    resolved_by?: string | null
                 }
                 Update: {
                     id?: string
@@ -343,6 +355,12 @@ export type Database = {
                     delivery_ids?: string[] | null
                     category?: string | null
                     created_at?: string | null
+                    vehicle_id?: string | null
+                    plate_extraction_status?: string | null
+                    extracted_plate?: string | null
+                    resolved?: boolean | null
+                    resolved_at?: string | null
+                    resolved_by?: string | null
                 }
                 Relationships: [
                     {
@@ -350,6 +368,13 @@ export type Database = {
                         columns: ["order_id"]
                         isOneToOne: false
                         referencedRelation: "orders"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "order_items_vehicle_id_fkey"
+                        columns: ["vehicle_id"]
+                        isOneToOne: false
+                        referencedRelation: "vehicles"
                         referencedColumns: ["id"]
                     },
                 ]

@@ -3,6 +3,10 @@
 import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
 
+/**
+ * @deprecated Use resolvePendingOrderItems from resolve-pending-item.ts instead.
+ * This function is kept for backwards compatibility but now also updates order_items.
+ */
 export async function resolvePendingOrder(orderId: string, plate: string) {
     const supabase = await createClient()
 
@@ -35,8 +39,22 @@ export async function resolvePendingOrder(orderId: string, plate: string) {
         return { error: "Błąd podczas aktualizacji zamówienia." }
     }
 
+    // 3. Also update all order_items for this order (new behavior)
+    await supabase
+        .from("order_items")
+        .update({
+            vehicle_id: vehicle.id,
+            plate_extraction_status: "manual",
+            extracted_plate: plate.toUpperCase(),
+            resolved: true,
+            resolved_at: new Date().toISOString(),
+            resolved_by: "user",
+        })
+        .eq("order_id", orderId)
+
     revalidatePath("/pending")
     revalidatePath("/")
     revalidatePath("/orders")
     return { success: true }
 }
+

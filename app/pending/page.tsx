@@ -1,12 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
-import { PendingTable } from '@/components/pending/PendingTable'
+import { PendingItemsTable } from '@/components/pending/PendingItemsTable'
 
 export default async function PendingPage() {
     const supabase = await createClient()
 
-    // Fetch pending orders
-    const { data: pending } = await supabase
-        .from('unresolved_pending_orders')
+    // Fetch pending items (new item-level view)
+    const { data: pendingItems } = await supabase
+        .from('unresolved_pending_items')
         .select('*')
         .order('order_date', { ascending: false })
 
@@ -21,10 +21,15 @@ export default async function PendingPage() {
         <div className="flex-1 space-y-4">
             <div className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight">Wymagana Weryfikacja</h2>
+                {pendingItems && pendingItems.length > 0 && (
+                    <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-semibold">
+                        {pendingItems.length} {pendingItems.length === 1 ? 'pozycja' : pendingItems.length < 5 ? 'pozycje' : 'pozycji'}
+                    </span>
+                )}
             </div>
 
             <div className="flex flex-col space-y-4">
-                <PendingTable items={pending || []} vehicles={vehicles || []} />
+                <PendingItemsTable items={pendingItems || []} vehicles={vehicles || []} />
             </div>
         </div>
     )
