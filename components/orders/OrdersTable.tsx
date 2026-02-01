@@ -11,10 +11,16 @@ import {
 import { formatCurrency, formatDate } from "@/utils/format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronUp, ArrowUpDown, ShoppingCart, Calendar, Car } from "lucide-react"
-import { useState } from "react"
+import { ChevronDown, ChevronUp, ArrowUpDown, ShoppingCart, Calendar, CheckCircle2, Clock, Car } from "lucide-react"
+import { useState, Fragment } from "react"
 import { cn } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
+import { ItemResolver } from "@/components/pending/ItemResolver"
+
+interface VehicleOption {
+    id: string
+    plate_number: string
+}
 
 interface OrderItem {
     id: string
@@ -22,6 +28,8 @@ interface OrderItem {
     sku: string | null
     required_quantity: number | null
     total_net: number | null
+    vehicle_id: string | null
+    vehicles?: { id: string; plate_number: string } | null
 }
 
 interface Order {
@@ -31,13 +39,12 @@ interface Order {
     total_gross: number
     status: string
     description: string | null
-    vehicle_id: string | null
+    branch_code: string | null
     branches?: { name: string } | { name: string }[] | null
-    vehicles?: { plate_number: string } | null
     order_items?: OrderItem[]
 }
 
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ orders, vehicles }: { orders: Order[]; vehicles: VehicleOption[] }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
@@ -77,10 +84,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                 orders.map((order) => {
                     const branchName = Array.isArray(order.branches)
                         ? order.branches[0]?.name
-                        : order.branches?.name
-                    const plate = Array.isArray(order.vehicles)
-                        ? order.vehicles[0]?.plate_number
-                        : order.vehicles?.plate_number
+                        : order.branches?.name || order.branch_code
                     const isExpanded = expandedRows.has(order.id)
 
                     return (
@@ -108,19 +112,22 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Badge variant={order.status === 'MATCHED' ? 'default' : 'secondary'} className="text-xs">
-                                            {order.status}
-                                        </Badge>
+                                        {order.status === 'completed' ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+                                                <CheckCircle2 className="h-3 w-3" />
+                                                Przypisane
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                                                <Clock className="h-3 w-3" />
+                                                Do przypisania
+                                            </span>
+                                        )}
                                         {isExpanded ? <ChevronUp className="h-5 w-5 text-slate-400" /> : <ChevronDown className="h-5 w-5 text-slate-400" />}
                                     </div>
                                 </div>
 
                                 <div className="flex flex-wrap gap-2 mt-2">
-                                    {plate && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
-                                            <Car className="h-3 w-3" /> {plate}
-                                        </span>
-                                    )}
                                     {branchName && (
                                         <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-600 text-xs">
                                             {branchName}
@@ -137,16 +144,29 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                             {isExpanded && order.order_items && order.order_items.length > 0 && (
                                 <div className="border-t border-slate-100 bg-slate-50/50 p-4">
                                     <p className="text-xs font-semibold text-slate-500 mb-2">Pozycje zamówienia:</p>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         {order.order_items.map((item) => (
-                                            <div key={item.id} className="flex justify-between text-sm">
-                                                <div className="flex-1 pr-2">
-                                                    <p className="font-medium text-slate-700 truncate">{item.name}</p>
-                                                    {item.sku && <p className="text-xs text-slate-400">{item.sku}</p>}
+                                            <div key={item.id} className="bg-white rounded-lg p-3 border border-slate-200">
+                                                <div className="flex justify-between text-sm mb-2">
+                                                    <div className="flex-1 pr-2">
+                                                        <p className="font-medium text-slate-700 truncate">{item.name}</p>
+                                                        {item.sku && <p className="text-xs text-slate-400">{item.sku}</p>}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-medium">{item.required_quantity}x</p>
+                                                        <p className="text-xs text-slate-500">{formatCurrency(item.total_net || 0)}</p>
+                                                    </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="font-medium">{item.required_quantity}x</p>
-                                                    <p className="text-xs text-slate-500">{formatCurrency(item.total_net || 0)}</p>
+                                                {/* Vehicle assignment section */}
+                                                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                                                    <ItemResolver
+                                                        itemId={item.id}
+                                                        orderId={order.id}
+                                                        itemName={item.name}
+                                                        allItems={order.order_items?.map(i => ({ id: i.id, name: i.name, sku: i.sku, total_gross: i.total_net })) || []}
+                                                        vehicles={vehicles}
+                                                        currentPlate={item.vehicles?.plate_number}
+                                                    />
                                                 </div>
                                             </div>
                                         ))}
@@ -166,14 +186,13 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[50px]"></TableHead>
+                        <TableHead></TableHead>
                         <TableHead>
                             <Button variant="ghost" onClick={() => handleSort('order_date')} className="-ml-4 h-8">
                                 Data <ArrowUpDown className="ml-2 h-4 w-4" />
                             </Button>
                         </TableHead>
                         <TableHead>Nr Zamówienia</TableHead>
-                        <TableHead>Pojazd</TableHead>
                         <TableHead>Oddział</TableHead>
                         <TableHead>Opis</TableHead>
                         <TableHead>Status</TableHead>
@@ -187,7 +206,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                 <TableBody>
                     {orders.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={8} className="text-center h-24 text-gray-500">
+                            <TableCell colSpan={7} className="text-center h-24 text-gray-500">
                                 Brak zamówień spełniających kryteria.
                             </TableCell>
                         </TableRow>
@@ -195,15 +214,12 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                         orders.map((order) => {
                             const branchName = Array.isArray(order.branches)
                                 ? order.branches[0]?.name
-                                : order.branches?.name
-                            const plate = Array.isArray(order.vehicles)
-                                ? order.vehicles[0]?.plate_number
-                                : order.vehicles?.plate_number
+                                : order.branches?.name || order.branch_code
                             const isExpanded = expandedRows.has(order.id)
 
                             return (
-                                <>
-                                    <TableRow key={order.id} className={cn("cursor-pointer hover:bg-muted/50", isExpanded && "bg-muted/50")} onClick={() => toggleRow(order.id)}>
+                                <Fragment key={order.id}>
+                                    <TableRow className={cn("cursor-pointer hover:bg-muted/50", isExpanded && "bg-muted/50")} onClick={() => toggleRow(order.id)}>
                                         <TableCell>
                                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -211,19 +227,26 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                         </TableCell>
                                         <TableCell className="font-medium">{formatDate(order.order_date)}</TableCell>
                                         <TableCell>{order.intercars_id || "-"}</TableCell>
-                                        <TableCell>{plate || order.vehicle_id || "-"}</TableCell>
-                                        <TableCell>{branchName}</TableCell>
+                                        <TableCell>{branchName || "-"}</TableCell>
                                         <TableCell className="max-w-[200px] truncate" title={order.description || ""}>{order.description || "-"}</TableCell>
                                         <TableCell>
-                                            <Badge variant={order.status === 'MATCHED' ? 'default' : 'secondary'}>
-                                                {order.status}
-                                            </Badge>
+                                            {order.status === 'completed' ? (
+                                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+                                                    <CheckCircle2 className="h-3 w-3" />
+                                                    Przypisane
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                                                    <Clock className="h-3 w-3" />
+                                                    Do przypisania
+                                                </span>
+                                            )}
                                         </TableCell>
                                         <TableCell className="text-right font-medium">{formatCurrency(order.total_gross)}</TableCell>
                                     </TableRow>
                                     {isExpanded && (
                                         <TableRow>
-                                            <TableCell colSpan={8} className="p-0 bg-muted/30">
+                                            <TableCell colSpan={7} className="p-0 bg-muted/30">
                                                 <div className="p-4">
                                                     <h4 className="font-semibold mb-2 text-sm">Pozycje zamówienia:</h4>
                                                     <Table>
@@ -233,6 +256,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                                                 <TableHead>SKU</TableHead>
                                                                 <TableHead className="text-right">Ilość</TableHead>
                                                                 <TableHead className="text-right">Wartość Netto</TableHead>
+                                                                <TableHead>Pojazd</TableHead>
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody>
@@ -243,11 +267,21 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                                                         <TableCell>{item.sku}</TableCell>
                                                                         <TableCell className="text-right">{item.required_quantity}</TableCell>
                                                                         <TableCell className="text-right">{formatCurrency(item.total_net || 0)}</TableCell>
+                                                                        <TableCell>
+                                                                            <ItemResolver
+                                                                                itemId={item.id}
+                                                                                orderId={order.id}
+                                                                                itemName={item.name}
+                                                                                allItems={order.order_items?.map(i => ({ id: i.id, name: i.name, sku: i.sku, total_gross: i.total_net })) || []}
+                                                                                vehicles={vehicles}
+                                                                                currentPlate={item.vehicles?.plate_number}
+                                                                            />
+                                                                        </TableCell>
                                                                     </TableRow>
                                                                 ))
                                                             ) : (
                                                                 <TableRow>
-                                                                    <TableCell colSpan={4} className="text-center text-muted-foreground">Brak pozycji</TableCell>
+                                                                    <TableCell colSpan={5} className="text-center text-muted-foreground">Brak pozycji</TableCell>
                                                                 </TableRow>
                                                             )}
                                                         </TableBody>
@@ -256,7 +290,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                             </TableCell>
                                         </TableRow>
                                     )}
-                                </>
+                                </Fragment>
                             )
                         })
                     )}

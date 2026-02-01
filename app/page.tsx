@@ -32,14 +32,27 @@ export default async function DashboardPage() {
     .select('*', { count: 'estimated', head: true })
     .eq('acknowledged', false)
 
-  // 2. Fetch Orders for calculations (Last 6 months)
+  // 2. Fetch Orders for chart and Order Items for vehicle stats (Last 6 months)
   const sixMonthsAgo = format(subMonths(new Date(), 6), 'yyyy-MM-dd')
   const startOfCurrentMonth = format(startOfMonth(new Date()), 'yyyy-MM-dd')
 
   const { data: orders } = await supabase
     .from('orders')
-    .select('total_gross, order_date, vehicle_id, branch_code, branches(name), vehicles(plate_number, brand, model)')
+    .select('total_gross, order_date, branch_code, branches(name)')
     .gte('order_date', sixMonthsAgo)
+
+  // Fetch order items with vehicle info for Top Vehicles calculation
+  const { data: orderItems } = await supabase
+    .from('order_items')
+    .select(`
+      id,
+      total_gross,
+      vehicle_id,
+      orders!inner(order_date, branch_code, branches(name)),
+      vehicles(id, plate_number, brand, model)
+    `)
+    .not('vehicle_id', 'is', null)
+    .gte('orders.order_date', startOfCurrentMonth)
 
   // Calculate Total Orders this month
   const totalOrdersAmount = orders
@@ -66,34 +79,33 @@ export default async function DashboardPage() {
     amount,
   }))
 
-  // Calculate Top Vehicles (This Month)
+  // Calculate Top Vehicles (This Month) from order items
   const topVehiclesMap = new Map<string, any>()
 
-  orders
-    ?.filter(o => o.order_date >= startOfCurrentMonth && o.vehicle_id)
-    .forEach(order => {
-      // Supabase join types might be arrays depending on relationship definition
-      const vData = Array.isArray(order.vehicles) ? order.vehicles[0] : order.vehicles
-      const bData = Array.isArray(order.branches) ? order.branches[0] : order.branches
+  orderItems?.forEach(item => {
+    const vData = Array.isArray(item.vehicles) ? item.vehicles[0] : item.vehicles
+    const orderData = Array.isArray(item.orders) ? item.orders[0] : item.orders
+    const bData = orderData?.branches ? (Array.isArray(orderData.branches) ? orderData.branches[0] : orderData.branches) : null
 
-      const plate = vData?.plate_number || 'Unknown'
-      const vehicleId = order.vehicle_id
+    if (!vData?.plate_number) return
 
-      if (!topVehiclesMap.has(plate)) {
-        topVehiclesMap.set(plate, {
-          id: vehicleId,
-          plate_number: plate,
-          brand: vData?.brand || '',
-          model: vData?.model || '',
-          branch_name: bData?.name || order.branch_code || 'Brak',
-          total_spent: 0,
-          order_count: 0
-        })
-      }
-      const v = topVehiclesMap.get(plate)
-      v.total_spent += order.total_gross || 0
-      v.order_count += 1
-    })
+    const plate = vData.plate_number
+
+    if (!topVehiclesMap.has(plate)) {
+      topVehiclesMap.set(plate, {
+        id: vData.id || item.vehicle_id,
+        plate_number: plate,
+        brand: vData.brand || '',
+        model: vData.model || '',
+        branch_name: bData?.name || orderData?.branch_code || 'Brak',
+        total_spent: 0,
+        order_count: 0
+      })
+    }
+    const v = topVehiclesMap.get(plate)
+    v.total_spent += item.total_gross || 0
+    v.order_count += 1
+  })
 
   const topVehicles = Array.from(topVehiclesMap.values())
     .sort((a, b) => b.total_spent - a.total_spent)

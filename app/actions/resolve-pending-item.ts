@@ -21,12 +21,12 @@ export async function resolvePendingItem(itemId: string, plate: string) {
     }
 
     // 2. Update the order item with vehicle_id and mark as resolved
+    // Note: A database trigger automatically updates the parent order's status to 'completed' 
+    // when all items have vehicle_id assigned
     const { error: oError } = await supabase
         .from("order_items")
         .update({
             vehicle_id: vehicle.id,
-            plate_extraction_status: "manual",
-            extracted_plate: plate.toUpperCase(),
             resolved: true,
             resolved_at: new Date().toISOString(),
             resolved_by: "user", // Placeholder for auth user
@@ -61,12 +61,12 @@ export async function resolvePendingOrderItems(orderId: string, plate: string) {
     }
 
     // 2. Update all items in the order
+    // Note: A database trigger automatically updates the parent order's status to 'completed'
+    // when all items have vehicle_id assigned
     const { error: itemsError, count } = await supabase
         .from("order_items")
         .update({
             vehicle_id: vehicle.id,
-            plate_extraction_status: "manual",
-            extracted_plate: plate.toUpperCase(),
             resolved: true,
             resolved_at: new Date().toISOString(),
             resolved_by: "user",
@@ -82,12 +82,6 @@ export async function resolvePendingOrderItems(orderId: string, plate: string) {
         .from("orders")
         .update({
             vehicle_id: vehicle.id,
-            plate_extraction_status: "manual",
-            extracted_plate: plate.toUpperCase(),
-            resolved: true,
-            resolved_at: new Date().toISOString(),
-            resolved_by: "user",
-            status: "confirmed"
         })
         .eq("id", orderId)
 

@@ -107,6 +107,266 @@ export type Database = {
                     },
                 ]
             }
+            order_items: {
+                Row: {
+                    accepted_quantity: number | null
+                    category: string | null
+                    collected_quantity: number | null
+                    created_at: string | null
+                    delivery_ids: string[] | null
+                    description: string | null
+                    eans: string[] | null
+                    id: string
+                    index_number: string | null
+                    missing_quantity: number | null
+                    name: string | null
+                    order_id: string
+                    packaged_quantity: number | null
+                    required_quantity: number | null
+                    resolved: boolean | null
+                    resolved_at: string | null
+                    resolved_by: string | null
+                    sku: string | null
+                    total_gross: number | null
+                    total_net: number | null
+                    unit_price_gross: number | null
+                    unit_price_net: number | null
+                    vehicle_id: string | null
+                }
+                Insert: {
+                    accepted_quantity?: number | null
+                    category?: string | null
+                    collected_quantity?: number | null
+                    created_at?: string | null
+                    delivery_ids?: string[] | null
+                    description?: string | null
+                    eans?: string[] | null
+                    id?: string
+                    index_number?: string | null
+                    missing_quantity?: number | null
+                    name?: string | null
+                    order_id: string
+                    packaged_quantity?: number | null
+                    required_quantity?: number | null
+                    resolved?: boolean | null
+                    resolved_at?: string | null
+                    resolved_by?: string | null
+                    sku?: string | null
+                    total_gross?: number | null
+                    total_net?: number | null
+                    unit_price_gross?: number | null
+                    unit_price_net?: number | null
+                    vehicle_id?: string | null
+                }
+                Update: {
+                    accepted_quantity?: number | null
+                    category?: string | null
+                    collected_quantity?: number | null
+                    created_at?: string | null
+                    delivery_ids?: string[] | null
+                    description?: string | null
+                    eans?: string[] | null
+                    id?: string
+                    index_number?: string | null
+                    missing_quantity?: number | null
+                    name?: string | null
+                    order_id?: string
+                    packaged_quantity?: number | null
+                    required_quantity?: number | null
+                    resolved?: boolean | null
+                    resolved_at?: string | null
+                    resolved_by?: string | null
+                    sku?: string | null
+                    total_gross?: number | null
+                    total_net?: number | null
+                    unit_price_gross?: number | null
+                    unit_price_net?: number | null
+                    vehicle_id?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "order_items_order_id_fkey"
+                        columns: ["order_id"]
+                        isOneToOne: false
+                        referencedRelation: "orders"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "order_items_vehicle_id_fkey"
+                        columns: ["vehicle_id"]
+                        isOneToOne: false
+                        referencedRelation: "vehicles"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            orders: {
+                Row: {
+                    amount: number
+                    branch_code: string | null
+                    branch_id: string | null
+                    created_at: string | null
+                    currency: string | null
+                    description: string | null
+                    id: string
+                    intercars_id: string | null
+                    order_date: string
+                    raw_comment: string | null
+                    status: string
+                    supplier: string | null
+                    total_gross: number | null
+                    total_net: number | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    amount: number
+                    branch_code?: string | null
+                    branch_id?: string | null
+                    created_at?: string | null
+                    currency?: string | null
+                    description?: string | null
+                    id?: string
+                    intercars_id?: string | null
+                    order_date: string
+                    raw_comment?: string | null
+                    status?: string
+                    supplier?: string | null
+                    total_gross?: number | null
+                    total_net?: number | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    amount?: number
+                    branch_code?: string | null
+                    branch_id?: string | null
+                    created_at?: string | null
+                    currency?: string | null
+                    description?: string | null
+                    id?: string
+                    intercars_id?: string | null
+                    order_date?: string
+                    raw_comment?: string | null
+                    status?: string
+                    supplier?: string | null
+                    total_gross?: number | null
+                    total_net?: number | null
+                    updated_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "orders_branch_id_fkey"
+                        columns: ["branch_id"]
+                        isOneToOne: false
+                        referencedRelation: "branches"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            profiles: {
+                Row: {
+                    branch_id: string | null
+                    id: string
+                    role: string
+                }
+                Insert: {
+                    branch_id?: string | null
+                    id: string
+                    role: string
+                }
+                Update: {
+                    branch_id?: string | null
+                    id?: string
+                    role?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "profiles_branch_id_fkey"
+                        columns: ["branch_id"]
+                        isOneToOne: false
+                        referencedRelation: "branches"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "profiles_id_fkey"
+                        columns: ["id"]
+                        isOneToOne: true
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            sync_log: {
+                Row: {
+                    completed_at: string | null
+                    created_at: string | null
+                    error_message: string | null
+                    errors_count: number | null
+                    id: string
+                    params: Json | null
+                    records_created: number | null
+                    records_fetched: number | null
+                    records_skipped: number | null
+                    records_updated: number | null
+                    started_at: string | null
+                    status: string | null
+                    sync_type: string
+                }
+                Insert: {
+                    completed_at?: string | null
+                    created_at?: string | null
+                    error_message?: string | null
+                    errors_count?: number | null
+                    id?: string
+                    params?: Json | null
+                    records_created?: number | null
+                    records_fetched?: number | null
+                    records_skipped?: number | null
+                    records_updated?: number | null
+                    started_at?: string | null
+                    status?: string | null
+                    sync_type: string
+                }
+                Update: {
+                    completed_at?: string | null
+                    created_at?: string | null
+                    error_message?: string | null
+                    errors_count?: number | null
+                    id?: string
+                    params?: Json | null
+                    records_created?: number | null
+                    records_fetched?: number | null
+                    records_skipped?: number | null
+                    records_updated?: number | null
+                    started_at?: string | null
+                    status?: string | null
+                    sync_type?: string
+                }
+                Relationships: []
+            }
+            system_settings: {
+                Row: {
+                    created_at: string | null
+                    id: string
+                    key: string
+                    updated_at: string | null
+                    value: Json
+                }
+                Insert: {
+                    created_at?: string | null
+                    id?: string
+                    key: string
+                    updated_at?: string | null
+                    value?: Json
+                }
+                Update: {
+                    created_at?: string | null
+                    id?: string
+                    key?: string
+                    updated_at?: string | null
+                    value?: Json
+                }
+                Relationships: []
+            }
             vehicles: {
                 Row: {
                     brand: string | null
@@ -213,269 +473,6 @@ export type Database = {
                         referencedColumns: ["id"]
                     },
                 ]
-            }
-            orders: {
-                Row: {
-                    amount: number
-                    branch_id: string | null
-                    created_at: string | null
-                    currency: string | null
-                    date: string
-                    description: string | null
-                    id: string
-                    intercars_id: string | null
-                    status: string
-                    supplier: string | null
-                    total_gross: number | null
-                    total_net: number | null
-                    updated_at: string | null
-                    vehicle_id: string | null
-                }
-                Insert: {
-                    amount: number
-                    branch_id?: string | null
-                    created_at?: string | null
-                    currency?: string | null
-                    date: string
-                    description?: string | null
-                    id?: string
-                    intercars_id?: string | null
-                    status?: string
-                    supplier?: string | null
-                    total_gross?: number | null
-                    total_net?: number | null
-                    updated_at?: string | null
-                    vehicle_id?: string | null
-                }
-                Update: {
-                    amount?: number
-                    branch_id?: string | null
-                    created_at?: string | null
-                    currency?: string | null
-                    date?: string
-                    description?: string | null
-                    id?: string
-                    intercars_id?: string | null
-                    status?: string
-                    supplier?: string | null
-                    total_gross?: number | null
-                    total_net?: number | null
-                    updated_at?: string | null
-                    vehicle_id?: string | null
-                }
-                Relationships: [
-                    {
-                        foreignKeyName: "orders_branch_id_fkey"
-                        columns: ["branch_id"]
-                        isOneToOne: false
-                        referencedRelation: "branches"
-                        referencedColumns: ["id"]
-                    },
-                    {
-                        foreignKeyName: "orders_vehicle_id_fkey"
-                        columns: ["vehicle_id"]
-                        isOneToOne: false
-                        referencedRelation: "vehicles"
-                        referencedColumns: ["id"]
-                    },
-                ]
-            }
-            order_items: {
-                Row: {
-                    id: string
-                    order_id: string | null
-                    name: string | null
-                    sku: string | null
-                    index_number: string | null
-                    required_quantity: number | null
-                    accepted_quantity: number | null
-                    collected_quantity: number | null
-                    packaged_quantity: number | null
-                    missing_quantity: number | null
-                    unit_price_net: number | null
-                    unit_price_gross: number | null
-                    total_net: number | null
-                    total_gross: number | null
-                    description: string | null
-                    eans: string[] | null
-                    delivery_ids: string[] | null
-                    category: string | null
-                    created_at: string | null
-                    vehicle_id: string | null
-                    plate_extraction_status: string | null
-                    extracted_plate: string | null
-                    resolved: boolean | null
-                    resolved_at: string | null
-                    resolved_by: string | null
-                }
-                Insert: {
-                    id?: string
-                    order_id?: string | null
-                    name?: string | null
-                    sku?: string | null
-                    index_number?: string | null
-                    required_quantity?: number | null
-                    accepted_quantity?: number | null
-                    collected_quantity?: number | null
-                    packaged_quantity?: number | null
-                    missing_quantity?: number | null
-                    unit_price_net?: number | null
-                    unit_price_gross?: number | null
-                    total_net?: number | null
-                    total_gross?: number | null
-                    description?: string | null
-                    eans?: string[] | null
-                    delivery_ids?: string[] | null
-                    category?: string | null
-                    created_at?: string | null
-                    vehicle_id?: string | null
-                    plate_extraction_status?: string | null
-                    extracted_plate?: string | null
-                    resolved?: boolean | null
-                    resolved_at?: string | null
-                    resolved_by?: string | null
-                }
-                Update: {
-                    id?: string
-                    order_id?: string | null
-                    name?: string | null
-                    sku?: string | null
-                    index_number?: string | null
-                    required_quantity?: number | null
-                    accepted_quantity?: number | null
-                    collected_quantity?: number | null
-                    packaged_quantity?: number | null
-                    missing_quantity?: number | null
-                    unit_price_net?: number | null
-                    unit_price_gross?: number | null
-                    total_net?: number | null
-                    total_gross?: number | null
-                    description?: string | null
-                    eans?: string[] | null
-                    delivery_ids?: string[] | null
-                    category?: string | null
-                    created_at?: string | null
-                    vehicle_id?: string | null
-                    plate_extraction_status?: string | null
-                    extracted_plate?: string | null
-                    resolved?: boolean | null
-                    resolved_at?: string | null
-                    resolved_by?: string | null
-                }
-                Relationships: [
-                    {
-                        foreignKeyName: "order_items_order_id_fkey"
-                        columns: ["order_id"]
-                        isOneToOne: false
-                        referencedRelation: "orders"
-                        referencedColumns: ["id"]
-                    },
-                    {
-                        foreignKeyName: "order_items_vehicle_id_fkey"
-                        columns: ["vehicle_id"]
-                        isOneToOne: false
-                        referencedRelation: "vehicles"
-                        referencedColumns: ["id"]
-                    },
-                ]
-            }
-            pending_orders: {
-                Row: {
-                    created_at: string | null
-                    error_type: string | null
-                    id: string
-                    order_id: string | null
-                    raw_comment: string | null
-                    reminder_count: number | null
-                    resolved: boolean | null
-                    resolved_at: string | null
-                    resolved_by: string | null
-                    resolved_plate: string | null
-                    updated_at: string | null
-                }
-                Insert: {
-                    created_at?: string | null
-                    error_type?: string | null
-                    id?: string
-                    order_id?: string | null
-                    raw_comment?: string | null
-                    reminder_count?: number | null
-                    resolved?: boolean | null
-                    resolved_at?: string | null
-                    resolved_by?: string | null
-                    resolved_plate?: string | null
-                    updated_at?: string | null
-                }
-                Update: {
-                    created_at?: string | null
-                    error_type?: string | null
-                    id?: string
-                    order_id?: string | null
-                    raw_comment?: string | null
-                    reminder_count?: number | null
-                    resolved?: boolean | null
-                    resolved_at?: string | null
-                    resolved_by?: string | null
-                    resolved_plate?: string | null
-                    updated_at?: string | null
-                }
-                Relationships: [
-                    {
-                        foreignKeyName: "pending_orders_order_id_fkey"
-                        columns: ["order_id"]
-                        isOneToOne: false
-                        referencedRelation: "orders"
-                        referencedColumns: ["id"]
-                    },
-                ]
-            }
-            sync_log: {
-                Row: {
-                    completed_at: string | null
-                    created_at: string | null
-                    error_message: string | null
-                    errors_count: number | null
-                    id: string
-                    params: Json | null
-                    records_created: number | null
-                    records_fetched: number | null
-                    records_skipped: number | null
-                    records_updated: number | null
-                    started_at: string | null
-                    status: string | null
-                    sync_type: string
-                }
-                Insert: {
-                    completed_at?: string | null
-                    created_at?: string | null
-                    error_message?: string | null
-                    errors_count?: number | null
-                    id?: string
-                    params?: Json | null
-                    records_created?: number | null
-                    records_fetched?: number | null
-                    records_skipped?: number | null
-                    records_updated?: number | null
-                    started_at?: string | null
-                    status?: string | null
-                    sync_type: string
-                }
-                Update: {
-                    completed_at?: string | null
-                    created_at?: string | null
-                    error_message?: string | null
-                    errors_count?: number | null
-                    id?: string
-                    params?: Json | null
-                    records_created?: number | null
-                    records_fetched?: number | null
-                    records_skipped?: number | null
-                    records_updated?: number | null
-                    started_at?: string | null
-                    status?: string | null
-                    sync_type?: string
-                }
-                Relationships: []
             }
         }
         Views: {

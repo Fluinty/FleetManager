@@ -44,6 +44,7 @@ interface ItemResolverProps {
     allItems?: PendingItem[]
     vehicles: VehicleOption[]
     fullWidth?: boolean
+    currentPlate?: string | null  // If provided, shows edit mode
 }
 
 export function ItemResolver({
@@ -52,17 +53,19 @@ export function ItemResolver({
     itemName,
     allItems = [],
     vehicles,
-    fullWidth = false
+    fullWidth = false,
+    currentPlate = null
 }: ItemResolverProps) {
     const router = useRouter()
     const [open, setOpen] = useState(false)
-    const [plate, setPlate] = useState("")
+    const [plate, setPlate] = useState(currentPlate || "")
     const [applyToAll, setApplyToAll] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const { toast } = useToast()
 
     const hasMultipleItems = allItems.length > 1
+    const isEditMode = !!currentPlate
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -88,9 +91,11 @@ export function ItemResolver({
                 setApplyToAll(false)
                 toast({
                     title: "Sukces",
-                    description: applyToAll && hasMultipleItems
-                        ? `Przypisano ${allItems.length} pozycji do pojazdu.`
-                        : "Pozycja została przypisana do pojazdu.",
+                    description: isEditMode
+                        ? "Przypisanie pojazdu zostało zmienione."
+                        : applyToAll && hasMultipleItems
+                            ? `Przypisano ${allItems.length} pozycji do pojazdu.`
+                            : "Pozycja została przypisana do pojazdu.",
                 })
                 // Refresh page to re-fetch data and remove resolved item from list
                 router.refresh()
@@ -100,6 +105,88 @@ export function ItemResolver({
         } finally {
             setLoading(false)
         }
+    }
+
+    // Edit mode: show assigned plate as clickable badge
+    if (isEditMode && !fullWidth) {
+        return (
+            <Dialog open={open} onOpenChange={(isOpen) => {
+                setOpen(isOpen)
+                if (isOpen) setPlate(currentPlate || "")
+            }}>
+                <DialogTrigger asChild>
+                    <button
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold hover:bg-emerald-200 transition-colors cursor-pointer"
+                        title="Kliknij, aby zmienić przypisanie"
+                    >
+                        <Car className="h-3 w-3" />
+                        {currentPlate}
+                    </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Package className="h-5 w-5 text-teal-500" />
+                            Zmień przypisanie pojazdu
+                        </DialogTitle>
+                        <DialogDescription>
+                            {itemName ? (
+                                <span>Aktualnie: <strong>{currentPlate}</strong> dla pozycji: <strong>{itemName}</strong></span>
+                            ) : (
+                                <span>Aktualnie przypisany: <strong>{currentPlate}</strong></span>
+                            )}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="plate" className="text-right">
+                                    Pojazd
+                                </Label>
+                                <div className="col-span-3">
+                                    <Select value={plate} onValueChange={setPlate}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Wybierz pojazd..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {vehicles.map((v) => (
+                                                <SelectItem key={v.id} value={v.plate_number}>
+                                                    {v.plate_number}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            {hasMultipleItems && (
+                                <div className="flex items-center space-x-2 px-4 py-3 bg-teal-50 rounded-lg border border-teal-100">
+                                    <Checkbox
+                                        id="applyToAll"
+                                        checked={applyToAll}
+                                        onCheckedChange={(checked) => setApplyToAll(checked === true)}
+                                    />
+                                    <label
+                                        htmlFor="applyToAll"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Zastosuj do wszystkich {allItems.length} pozycji w zamówieniu
+                                    </label>
+                                </div>
+                            )}
+
+                            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit" disabled={loading || !plate || plate === currentPlate}>
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {applyToAll && hasMultipleItems ? "Zmień wszystkie" : "Zmień przypisanie"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        )
     }
 
     return (

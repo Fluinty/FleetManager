@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import { VehicleInfo } from '@/components/vehicles/VehicleInfo'
 import { ExpensesChart } from '@/components/dashboard/ExpensesChart'
-import { VehicleOrdersHistory } from '@/components/vehicles/VehicleOrdersHistory'
+import { VehicleItemsHistory } from '@/components/vehicles/VehicleItemsHistory'
 import { subMonths, format } from 'date-fns'
 
 interface PageProps {
@@ -24,24 +24,38 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
         notFound()
     }
 
-    // 2. Fetch Orders History (All time for list, last 12 months for chart)
-    const { data: orders } = await supabase
-        .from('orders')
-        .select('*')
+    // 2. Fetch Order Items assigned to this vehicle (with order info for date/intercars_id)
+    const { data: items } = await supabase
+        .from('order_items')
+        .select(`
+            id,
+            name,
+            sku,
+            required_quantity,
+            total_gross,
+            orders!inner(
+                id,
+                order_date,
+                intercars_id
+            )
+        `)
         .eq('vehicle_id', id)
-        .order('order_date', { ascending: false })
+        .order('created_at', { ascending: false })
 
-    // 3. Calculate Expenses Chart Data (Last 12 months)
+    // 3. Calculate Expenses Chart Data (Last 12 months) from items
     const expensesMap = new Map<string, number>()
     for (let i = 11; i >= 0; i--) {
         const d = subMonths(new Date(), i)
         expensesMap.set(format(d, 'MM/yyyy'), 0)
     }
 
-    orders?.forEach(order => {
-        const monthKey = format(new Date(order.order_date), 'MM/yyyy')
-        if (expensesMap.has(monthKey)) {
-            expensesMap.set(monthKey, (expensesMap.get(monthKey) || 0) + (order.total_gross || 0))
+    items?.forEach(item => {
+        const order = Array.isArray(item.orders) ? item.orders[0] : item.orders
+        if (order?.order_date) {
+            const monthKey = format(new Date(order.order_date), 'MM/yyyy')
+            if (expensesMap.has(monthKey)) {
+                expensesMap.set(monthKey, (expensesMap.get(monthKey) || 0) + (item.total_gross || 0))
+            }
         }
     })
 
@@ -71,8 +85,8 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
             </div>
 
             <div className="space-y-4">
-                <h3 className="text-xl font-bold tracking-tight">Historia Zamówień</h3>
-                <VehicleOrdersHistory orders={orders || []} />
+                <h3 className="text-xl font-bold tracking-tight">Przypisane Części</h3>
+                <VehicleItemsHistory items={items || []} />
             </div>
         </div>
     )

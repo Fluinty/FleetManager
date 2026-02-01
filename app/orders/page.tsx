@@ -21,14 +21,27 @@ export default async function OrdersPage({
 
     let query = supabase
         .from('orders')
-        .select('*, branches(name), vehicles(plate_number), order_items(*)')
+        .select('*, branches(name), order_items(*, vehicles(id, plate_number))')
 
     if (search) {
         query = query.or(`intercars_id.ilike.%${search}%,description.ilike.%${search}%`)
     }
 
     if (branch) {
-        query = query.eq('branch_id', branch)
+        // First try to get branch code from selected branch ID to match orders by branch_code
+        const { data: selectedBranch } = await supabase
+            .from('branches')
+            .select('code')
+            .eq('id', branch)
+            .single()
+
+        if (selectedBranch?.code) {
+            // Filter by branch_code (orders may have this instead of branch_id)
+            query = query.or(`branch_id.eq.${branch},branch_code.eq.${selectedBranch.code}`)
+        } else {
+            // Fallback to just branch_id
+            query = query.eq('branch_id', branch)
+        }
     }
 
     if (status !== 'ALL') {
@@ -50,6 +63,9 @@ export default async function OrdersPage({
 
     const { data: branches } = await supabase.from('branches').select('id, name').order('name')
 
+    // Fetch vehicles for assignment
+    const { data: vehicles } = await supabase.from('vehicles').select('id, plate_number').order('plate_number')
+
     return (
         <div className="flex-1 space-y-4">
             <div className="flex items-center justify-between space-y-2">
@@ -59,7 +75,7 @@ export default async function OrdersPage({
             <div className="flex flex-col space-y-4">
                 <OrdersFilters branches={branches || []} />
                 <Suspense fallback={<div>Ładowanie...</div>}>
-                    <OrdersTable orders={orders || []} />
+                    <OrdersTable orders={orders || []} vehicles={vehicles || []} />
                 </Suspense>
             </div>
         </div>

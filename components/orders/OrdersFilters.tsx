@@ -94,10 +94,8 @@ export function OrdersFilters({ branches }: { branches: Branch[] }) {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ALL">Wszystkie</SelectItem>
-                        <SelectItem value="MATCHED">Zgodne</SelectItem>
-                        <SelectItem value="INVALID">Błędne</SelectItem>
-                        <SelectItem value="MISSING">Brak w systemie</SelectItem>
-                        <SelectItem value="PENDING">Oczekujące</SelectItem>
+                        <SelectItem value="completed">Przypisane</SelectItem>
+                        <SelectItem value="pending">Do przypisania</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

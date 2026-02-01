@@ -21,17 +21,11 @@ export async function resolvePendingOrder(orderId: string, plate: string) {
         return { error: "Nie znaleziono pojazdu o podanym numerze rejestracyjnym." }
     }
 
-    // 2. Update Order with vehicle_id and mark as resolved
+    // 2. Update Order with vehicle_id (status is managed by trigger now)
     const { error: oError } = await supabase
         .from("orders")
         .update({
             vehicle_id: vehicle.id,
-            plate_extraction_status: "manual",
-            extracted_plate: plate.toUpperCase(),
-            resolved: true,
-            resolved_at: new Date().toISOString(),
-            resolved_by: "user", // Placeholder for auth user
-            status: "confirmed"  // Mark as confirmed when plate assigned
         })
         .eq("id", orderId)
 
@@ -39,13 +33,11 @@ export async function resolvePendingOrder(orderId: string, plate: string) {
         return { error: "Błąd podczas aktualizacji zamówienia." }
     }
 
-    // 3. Also update all order_items for this order (new behavior)
+    // 3. Also update all order_items for this order
     await supabase
         .from("order_items")
         .update({
             vehicle_id: vehicle.id,
-            plate_extraction_status: "manual",
-            extracted_plate: plate.toUpperCase(),
             resolved: true,
             resolved_at: new Date().toISOString(),
             resolved_by: "user",

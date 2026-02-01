@@ -19,7 +19,6 @@ interface PendingItem {
     item_name: string | null
     sku: string | null
     item_total: number | null
-    plate_extraction_status: string | null
     order_id: string
     intercars_id: string
     order_date: string
@@ -123,9 +122,9 @@ function OrderItemsGroup({
                             </div>
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold flex items-center gap-1">
+                            <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold flex items-center gap-1">
                                 <AlertCircle className="h-3 w-3" />
-                                {item.plate_extraction_status}
+                                Brak pojazdu
                             </span>
                             <span className="text-sm font-semibold text-slate-600">
                                 {formatCurrency(item.item_total)}
@@ -216,8 +215,8 @@ export function PendingItemsTable({ items, vehicles }: { items: PendingItem[], v
                                 </TableCell>
                                 <TableCell className="text-slate-500">{item.sku || "-"}</TableCell>
                                 <TableCell>
-                                    <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
-                                        {item.plate_extraction_status}
+                                    <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                                        Brak pojazdu
                                     </span>
                                 </TableCell>
                                 <TableCell className="text-right">{formatCurrency(item.item_total)}</TableCell>
