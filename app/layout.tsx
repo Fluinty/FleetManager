@@ -42,6 +42,18 @@ export default async function RootLayout({
     userRole = profile?.role
   }
 
+  // If no user is logged in, render without sidebar (for login page)
+  if (!user) {
+    return (
+      <html lang="pl" className="h-full">
+        <body className={`${inter.className} ${spaceGrotesk.variable} h-full overflow-hidden`}>
+          {children}
+          <Toaster />
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="pl" className="h-full">
       <body className={`${inter.className} ${spaceGrotesk.variable} h-full overflow-hidden`}>
