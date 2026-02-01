@@ -55,7 +55,7 @@ export function SpendingByBranchChart({ data }: SpendingByBranchChartProps) {
                             tick={{ fill: '#334155', fontSize: 13, fontWeight: 500 }}
                         />
                         <Tooltip
-                            formatter={(value: number) => [formatCurrency(value), "Wydatki"]}
+                            formatter={(value: any) => [formatCurrency(value), "Wydatki"]}
                             contentStyle={{
                                 backgroundColor: 'white',
                                 border: '1px solid #e2e8f0',
