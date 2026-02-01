@@ -19,7 +19,12 @@ interface Branch {
     name: string
 }
 
-export function OrdersFilters({ branches }: { branches: Branch[] }) {
+interface OrdersFiltersProps {
+    branches: Branch[]
+    showBranchFilter?: boolean
+}
+
+export function OrdersFilters({ branches, showBranchFilter = true }: OrdersFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -69,22 +74,24 @@ export function OrdersFilters({ branches }: { branches: Branch[] }) {
                 />
             </div>
 
-            <div className="w-full md:w-auto">
-                <label className="text-xs font-medium mb-1 block">Oddział</label>
-                <Select value={branch} onValueChange={setBranch}>
-                    <SelectTrigger className="w-full md:w-[180px]">
-                        <SelectValue placeholder="Wybierz oddział" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Wszystkie oddziały</SelectItem>
-                        {branches.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                                {b.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            {showBranchFilter && (
+                <div className="w-full md:w-auto">
+                    <label className="text-xs font-medium mb-1 block">Oddział</label>
+                    <Select value={branch} onValueChange={setBranch}>
+                        <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectValue placeholder="Wybierz oddział" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Wszystkie oddziały</SelectItem>
+                            {branches.map((b) => (
+                                <SelectItem key={b.id} value={b.id}>
+                                    {b.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
 
             <div className="w-full md:w-auto">
                 <label className="text-xs font-medium mb-1 block">Status</label>

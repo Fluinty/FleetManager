@@ -15,7 +15,12 @@ const navigation = [
     { name: "Alerty", href: "/alerts", icon: Bell },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+    userEmail?: string
+    userRole?: string
+}
+
+export function Sidebar({ userEmail, userRole }: SidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
 
@@ -126,18 +131,20 @@ export function Sidebar() {
 
                 {/* Footer Section */}
                 <div className="border-t border-slate-100 p-4 space-y-2 bg-slate-50/50">
-                    <Link
-                        href="/settings"
-                        className={cn(
-                            "group flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300",
-                            pathname === "/settings"
-                                ? "bg-teal-50 text-teal-700"
-                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                        )}
-                    >
-                        <Settings className="mr-3 h-5 w-5 flex-shrink-0 text-slate-500 group-hover:text-slate-700 transition-transform group-hover:rotate-90 duration-500" />
-                        Ustawienia
-                    </Link>
+                    {userRole === 'admin' && (
+                        <Link
+                            href="/settings"
+                            className={cn(
+                                "group flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300",
+                                pathname === "/settings"
+                                    ? "bg-teal-50 text-teal-700"
+                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            )}
+                        >
+                            <Settings className="mr-3 h-5 w-5 flex-shrink-0 text-slate-500 group-hover:text-slate-700 transition-transform group-hover:rotate-90 duration-500" />
+                            Ustawienia
+                        </Link>
+                    )}
                     <form action={logout}>
                         <button
                             type="submit"
@@ -154,8 +161,8 @@ export function Sidebar() {
                             <User className="h-5 w-5 text-slate-600" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-800 truncate">Admin</p>
-                            <p className="text-xs text-slate-500 truncate">administrator</p>
+                            <p className="text-sm font-semibold text-slate-800 truncate">{userEmail || 'User'}</p>
+                            <p className="text-xs text-slate-500 truncate capitalize">{userRole || 'user'}</p>
                         </div>
                     </div>
                 </div>

@@ -10,6 +10,18 @@ export default async function VehiclesPage({
 }) {
     const supabase = await createClient()
 
+    // Check user role
+    const { data: { user } } = await supabase.auth.getUser()
+    let isAdmin = false
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
+
     // Extract filters
     const params = await searchParams;
     const search = typeof params.search === 'string' ? params.search : ''
@@ -54,7 +66,7 @@ export default async function VehiclesPage({
             </div>
 
             <div className="flex flex-col space-y-4">
-                <VehiclesFilters branches={branches || []} />
+                <VehiclesFilters branches={branches || []} showBranchFilter={isAdmin} />
                 <Suspense fallback={<div>Ładowanie...</div>}>
                     <VehiclesTable vehicles={vehicles || []} />
                 </Suspense>

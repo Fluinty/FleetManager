@@ -22,6 +22,7 @@ interface Branch {
 
 interface StatisticsFiltersProps {
     branches: Branch[]
+    showBranchFilter?: boolean
 }
 
 // Generate last 12 months for selection
@@ -37,7 +38,7 @@ function generateMonthOptions() {
     return months
 }
 
-export function StatisticsFilters({ branches }: StatisticsFiltersProps) {
+export function StatisticsFilters({ branches, showBranchFilter = true }: StatisticsFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -88,22 +89,24 @@ export function StatisticsFilters({ branches }: StatisticsFiltersProps) {
             </div>
 
             {/* Branch Selector */}
-            <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-slate-500" />
-                <Select value={branch} onValueChange={setBranch}>
-                    <SelectTrigger className="w-[180px] bg-white/80 border-slate-200">
-                        <SelectValue placeholder="Wszystkie oddziały" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Wszystkie oddziały</SelectItem>
-                        {branches.map((b) => (
-                            <SelectItem key={b.id} value={b.code}>
-                                {b.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            {showBranchFilter && (
+                <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-slate-500" />
+                    <Select value={branch} onValueChange={setBranch}>
+                        <SelectTrigger className="w-[180px] bg-white/80 border-slate-200">
+                            <SelectValue placeholder="Wszystkie oddziały" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Wszystkie oddziały</SelectItem>
+                            {branches.map((b) => (
+                                <SelectItem key={b.id} value={b.code}>
+                                    {b.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
 
             {/* Clear Filters */}
             {hasActiveFilters && (

@@ -10,6 +10,18 @@ export default async function OrdersPage({
 }) {
     const supabase = await createClient()
 
+    // Check user role
+    const { data: { user } } = await supabase.auth.getUser()
+    let isAdmin = false
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
+
     const params = await searchParams;
     const search = typeof params.search === 'string' ? params.search : ''
     const branch = typeof params.branch === 'string' ? params.branch : ''
@@ -73,7 +85,7 @@ export default async function OrdersPage({
             </div>
 
             <div className="flex flex-col space-y-4">
-                <OrdersFilters branches={branches || []} />
+                <OrdersFilters branches={branches || []} showBranchFilter={isAdmin} />
                 <Suspense fallback={<div>Ładowanie...</div>}>
                     <OrdersTable orders={orders || []} vehicles={vehicles || []} />
                 </Suspense>

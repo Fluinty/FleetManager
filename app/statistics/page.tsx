@@ -15,6 +15,18 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
     const supabase = await createClient()
     const params = await searchParams
 
+    // Check user role
+    const { data: { user } } = await supabase.auth.getUser()
+    let isAdmin = false
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
+
     // Default to current month
     const currentMonthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd')
     const selectedMonth = params.month || currentMonthStart
@@ -180,7 +192,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                     </h2>
                     <p className="text-slate-500 mt-1 capitalize">{monthDisplay}</p>
                 </div>
-                <StatisticsFilters branches={branches || []} />
+                <StatisticsFilters branches={branches || []} showBranchFilter={isAdmin} />
             </div>
 
             {/* Summary Cards */}

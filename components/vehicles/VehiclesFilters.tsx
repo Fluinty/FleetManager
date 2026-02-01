@@ -19,7 +19,12 @@ interface Branch {
     name: string
 }
 
-export function VehiclesFilters({ branches }: { branches: Branch[] }) {
+interface VehiclesFiltersProps {
+    branches: Branch[]
+    showBranchFilter?: boolean
+}
+
+export function VehiclesFilters({ branches, showBranchFilter = true }: VehiclesFiltersProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -66,19 +71,21 @@ export function VehiclesFilters({ branches }: { branches: Branch[] }) {
                 onChange={(e) => setSearch(e.target.value)}
                 className="max-w-sm"
             />
-            <Select value={branch} onValueChange={setBranch}>
-                <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Wybierz oddział" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">Wszystkie oddziały</SelectItem>
-                    {branches.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>
-                            {b.name}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            {showBranchFilter && (
+                <Select value={branch} onValueChange={setBranch}>
+                    <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Wybierz oddział" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Wszystkie oddziały</SelectItem>
+                        {branches.map((b) => (
+                            <SelectItem key={b.id} value={b.id}>
+                                {b.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )}
             <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Status" />
