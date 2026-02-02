@@ -61,14 +61,14 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
             id,
             total_gross,
             vehicle_id,
-            orders!inner(id, order_date, branch_code)
+            orders!inner(id, order_date, branch_id, branches(code, name))
         `)
         .not('vehicle_id', 'is', null)
         .gte('orders.order_date', monthStart)
         .lte('orders.order_date', monthEnd)
 
     if (selectedBranch) {
-        currentQuery = currentQuery.eq('orders.branch_code', selectedBranch)
+        currentQuery = currentQuery.eq('orders.branches.code', selectedBranch)
     }
 
     const { data: currentItems } = await currentQuery
@@ -80,14 +80,14 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
             id,
             total_gross,
             vehicle_id,
-            orders!inner(id, order_date, branch_code)
+            orders!inner(id, order_date, branch_id, branches(code, name))
         `)
         .not('vehicle_id', 'is', null)
         .gte('orders.order_date', prevMonthStart)
         .lte('orders.order_date', prevMonthEnd)
 
     if (selectedBranch) {
-        prevQuery = prevQuery.eq('orders.branch_code', selectedBranch)
+        prevQuery = prevQuery.eq('orders.branches.code', selectedBranch)
     }
 
     const { data: prevItems } = await prevQuery
@@ -110,7 +110,8 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
 
     currentItems?.forEach(item => {
         const order = Array.isArray(item.orders) ? item.orders[0] : item.orders
-        const branchCode = order?.branch_code || 'UNKNOWN'
+        const branch = Array.isArray(order?.branches) ? order?.branches[0] : order?.branches
+        const branchCode = branch?.code || 'UNKNOWN'
 
         if (!branchSpendingMap.has(branchCode)) {
             branchSpendingMap.set(branchCode, { spending: 0, vehicles: new Set(), orders: new Set() })
