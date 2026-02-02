@@ -1,8 +1,24 @@
 import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 import { AlertsTable } from '@/components/alerts/AlertsTable'
 
 export default async function AlertsPage() {
     const supabase = await createClient()
+
+    // Check user role - only admins can access
+    const { data: { user } } = await supabase.auth.getUser()
+    let isAdmin = false
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
+    if (!isAdmin) {
+        redirect('/')
+    }
 
     const { data: alerts } = await supabase
         .from('budget_alerts')

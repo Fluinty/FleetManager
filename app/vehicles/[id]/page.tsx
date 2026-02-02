@@ -13,6 +13,18 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
     const supabase = await createClient()
     const { id } = await params
 
+    // Check user role
+    const { data: { user } } = await supabase.auth.getUser()
+    let isAdmin = true
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+        isAdmin = profile?.role === 'admin'
+    }
+
     // 1. Fetch Vehicle Details
     const { data: vehicle, error } = await supabase
         .from('vehicles')
@@ -84,10 +96,12 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
                 </div>
             </div>
 
-            <div className="space-y-4">
-                <h3 className="text-xl font-bold tracking-tight">Przypisane Części</h3>
-                <VehicleItemsHistory items={items || []} />
-            </div>
+            {isAdmin && (
+                <div className="space-y-4">
+                    <h3 className="text-xl font-bold tracking-tight">Przypisane Części</h3>
+                    <VehicleItemsHistory items={items || []} />
+                </div>
+            )}
         </div>
     )
 }

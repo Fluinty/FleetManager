@@ -3,6 +3,8 @@
 import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
 
+import { checkBudgetAlerts } from "./check-budget"
+
 export async function updateBudgetLimit(amount: number) {
     const supabase = await createClient()
 
@@ -25,6 +27,9 @@ export async function updateBudgetLimit(amount: number) {
         console.error("Error updating budget limit:", error)
         return { error: "Wystąpił błąd podczas aktualizacji limitu." }
     }
+
+    // Trigger alert check
+    await checkBudgetAlerts()
 
     revalidatePath('/settings')
     revalidatePath('/') // Revalidate dashboard as it might use this setting

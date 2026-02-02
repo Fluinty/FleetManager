@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 import { StatisticsFilters } from '@/components/statistics/StatisticsFilters'
 import { StatsSummaryCards } from '@/components/statistics/StatsSummaryCards'
 import { SpendingByBranchChart } from '@/components/statistics/SpendingByBranchChart'
@@ -25,6 +26,11 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
             .eq('id', user.id)
             .single()
         isAdmin = profile?.role === 'admin'
+    }
+
+    // Only admins can access this page
+    if (!isAdmin) {
+        redirect('/')
     }
 
     // Default to current month

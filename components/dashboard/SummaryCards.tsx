@@ -6,13 +6,15 @@ interface SummaryCardsProps {
     totalOrdersAmount: number
     pendingOrdersCount: number
     activeAlertsCount: number
+    isAdmin?: boolean
 }
 
 export function SummaryCards({
     vehicleCount,
     totalOrdersAmount,
     pendingOrdersCount,
-    activeAlertsCount
+    activeAlertsCount,
+    isAdmin = true
 }: SummaryCardsProps) {
     const cards = [
         {
@@ -55,9 +57,10 @@ export function SummaryCards({
             iconBg: "bg-red-100",
             iconColor: "text-red-600",
             highlight: activeAlertsCount > 0,
-            href: "/alerts"
+            href: "/alerts",
+            adminOnly: true
         }
-    ]
+    ].filter(card => !card.adminOnly || isAdmin)
 
     return (
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">

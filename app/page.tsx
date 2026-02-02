@@ -182,6 +182,7 @@ export default async function DashboardPage() {
         totalOrdersAmount={totalOrdersAmount}
         pendingOrdersCount={pendingOrdersCount || 0}
         activeAlertsCount={activeAlertsCount || 0}
+        isAdmin={isAdmin}
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -193,7 +194,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <TopVehiclesTable vehicles={topVehicles} />
+      {isAdmin && <TopVehiclesTable vehicles={topVehicles} />}
     </div>
   )
 }

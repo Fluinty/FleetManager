@@ -3,6 +3,8 @@
 import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
 
+import { checkBudgetAlerts } from "./check-budget"
+
 /**
  * Resolve a single order item by assigning a vehicle to it
  */
@@ -36,6 +38,9 @@ export async function resolvePendingItem(itemId: string, plate: string) {
     if (oError) {
         return { error: "Błąd podczas aktualizacji pozycji zamówienia." }
     }
+
+    // Trigger alert check
+    await checkBudgetAlerts()
 
     revalidatePath("/pending")
     revalidatePath("/")
@@ -78,6 +83,7 @@ export async function resolvePendingOrderItems(orderId: string, plate: string) {
     }
 
     // 3. Also update the order's vehicle_id for backward compatibility
+    // This is optional - if it fails, items are still assigned successfully
     const { error: orderError } = await supabase
         .from("orders")
         .update({
@@ -86,8 +92,12 @@ export async function resolvePendingOrderItems(orderId: string, plate: string) {
         .eq("id", orderId)
 
     if (orderError) {
-        return { error: "Błąd podczas aktualizacji zamówienia." }
+        // Log warning but don't fail - main operation succeeded
+        console.warn("Warning: Could not update order vehicle_id (backwards compatibility):", orderError.message)
     }
+
+    // Trigger alert check
+    await checkBudgetAlerts()
 
     revalidatePath("/pending")
     revalidatePath("/")

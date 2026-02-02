@@ -9,9 +9,9 @@ import { useState, useEffect } from "react"
 const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Pojazdy", href: "/vehicles", icon: Car },
-    { name: "Zamówienia", href: "/orders", icon: ShoppingCart },
+    { name: "Zamówienia", href: "/orders", icon: ShoppingCart, adminOnly: true },
     { name: "Do weryfikacji", href: "/pending", icon: AlertTriangle },
-    { name: "Statystyki", href: "/statistics", icon: BarChart3 },
+    { name: "Statystyki", href: "/statistics", icon: BarChart3, adminOnly: true },
     { name: "Alerty", href: "/alerts", icon: Bell, adminOnly: true },
 ]
 

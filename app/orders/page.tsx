@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 import { OrdersFilters } from '@/components/orders/OrdersFilters'
 import { OrdersTable } from '@/components/orders/OrdersTable'
 import { Suspense } from 'react'
@@ -20,6 +21,11 @@ export default async function OrdersPage({
             .eq('id', user.id)
             .single()
         isAdmin = profile?.role === 'admin'
+    }
+
+    // Only admins can access this page
+    if (!isAdmin) {
+        redirect('/')
     }
 
     const params = await searchParams;
