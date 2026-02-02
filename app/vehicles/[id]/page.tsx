@@ -9,6 +9,8 @@ interface PageProps {
     params: { id: string }
 }
 
+import { AddInvoiceModal } from '@/components/vehicles/AddInvoiceModal'
+
 export default async function VehicleDetailsPage({ params }: PageProps) {
     const supabase = await createClient()
     const { id } = await params
@@ -82,9 +84,14 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
 
     return (
         <div className="flex-1 space-y-4">
-            <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">{vehicle.plate_number}</h2>
-                <span className="text-muted-foreground text-sm">{vehicle.brand} {vehicle.model}</span>
+            <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-bold tracking-tight">{vehicle.plate_number}</h2>
+                    <span className="text-muted-foreground text-sm">{vehicle.brand} {vehicle.model}</span>
+                </div>
+                {isAdmin && (
+                    <AddInvoiceModal vehicleId={id} vehiclePlate={vehicle.plate_number} />
+                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
