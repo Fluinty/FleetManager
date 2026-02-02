@@ -93,3 +93,80 @@ export async function createUser(prevState: any, formData: FormData) {
         return { message: `Error: ${e.message}`, success: false }
     }
 }
+
+/**
+ * Changes a user's password (admin only)
+ * Requires SUPABASE_SERVICE_ROLE_KEY environment variable
+ */
+export async function changeUserPassword(prevState: any, formData: FormData) {
+    const supabase = await createClient()
+
+    // 1. Check if current user is admin
+    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
+    if (authError || !currentUser) {
+        return { message: 'Unauthorized', success: false }
+    }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single()
+
+    if (profile?.role !== 'admin') {
+        return { message: 'Only admins can change passwords', success: false }
+    }
+
+    // 2. Extract Data
+    const userId = formData.get('userId') as string
+    const newPassword = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (!userId || !newPassword || !confirmPassword) {
+        return { message: 'Missing required fields', success: false }
+    }
+
+    if (newPassword !== confirmPassword) {
+        return { message: 'Passwords do not match', success: false }
+    }
+
+    if (newPassword.length < 6) {
+        return { message: 'Password must be at least 6 characters', success: false }
+    }
+
+    try {
+        // 3. Create Admin Client with Secret Key (formerly service_role key)
+        const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+
+        if (!secretKey) {
+            return { message: 'Secret key not configured. Add SUPABASE_SECRET_KEY to .env.local', success: false }
+        }
+
+        const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+        const adminClient = createAdminClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            secretKey,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        )
+
+        // 4. Update user password using admin API
+        const { error: updateError } = await adminClient.auth.admin.updateUserById(
+            userId,
+            { password: newPassword }
+        )
+
+        if (updateError) {
+            return { message: updateError.message, success: false }
+        }
+
+        return { message: 'Password changed successfully', success: true }
+
+    } catch (e: any) {
+        return { message: `Error: ${e.message}`, success: false }
+    }
+}

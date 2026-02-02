@@ -8,12 +8,13 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { AddUserDialog } from "./AddUserDialog"
+import { ChangePasswordDialog } from "./ChangePasswordDialog"
 
 export function UsersList({ users, branches }: { users: any[], branches: any[] }) {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Users Management</h3>
+                <h3 className="text-lg font-medium">Zarządzanie użytkownikami</h3>
                 <AddUserDialog branches={branches} />
             </div>
             <div className="rounded-md border">
@@ -21,14 +22,15 @@ export function UsersList({ users, branches }: { users: any[], branches: any[] }
                     <TableHeader>
                         <TableRow>
                             <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Branch</TableHead>
+                            <TableHead>Rola</TableHead>
+                            <TableHead>Oddział</TableHead>
+                            <TableHead className="w-[50px]">Akcje</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {users.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={3} className="text-center">No users found</TableCell>
+                                <TableCell colSpan={4} className="text-center">Nie znaleziono użytkowników</TableCell>
                             </TableRow>
                         ) : (
                             users.map((user) => (
@@ -39,6 +41,9 @@ export function UsersList({ users, branches }: { users: any[], branches: any[] }
                                     </TableCell>
                                     <TableCell>
                                         {branches.find(b => b.id === user.branch_id)?.name || '-'}
+                                    </TableCell>
+                                    <TableCell>
+                                        <ChangePasswordDialog userId={user.id} userEmail={user.email} />
                                     </TableCell>
                                 </TableRow>
                             ))

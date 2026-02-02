@@ -44,23 +44,23 @@ export function AddUserDialog({ branches }: { branches: { id: string, name: stri
             const result = await createUser(null, formData)
             if (result.success) {
                 toast({
-                    title: "Success",
-                    description: "User created successfully",
+                    title: "Sukces",
+                    description: "Użytkownik został utworzony",
                 })
                 setOpen(false)
                 router.refresh()
             } else {
                 toast({
                     variant: "destructive",
-                    title: "Error",
+                    title: "Błąd",
                     description: result.message,
                 })
             }
         } catch (error) {
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: "Something went wrong",
+                title: "Błąd",
+                description: "Coś poszło nie tak",
             })
         } finally {
             setIsLoading(false)
@@ -70,13 +70,13 @@ export function AddUserDialog({ branches }: { branches: { id: string, name: stri
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>Add User</Button>
+                <Button>Dodaj użytkownika</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add New User</DialogTitle>
+                    <DialogTitle>Dodaj nowego użytkownika</DialogTitle>
                     <DialogDescription>
-                        Create a new user. They will need this password to login initially.
+                        Utwórz nowego użytkownika. Użytkownik będzie potrzebował tego hasła do pierwszego logowania.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit} className="grid gap-4 py-4">
@@ -94,7 +94,7 @@ export function AddUserDialog({ branches }: { branches: { id: string, name: stri
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="password" className="text-right">
-                            Password
+                            Hasło
                         </Label>
                         <Input
                             id="password"
@@ -107,27 +107,27 @@ export function AddUserDialog({ branches }: { branches: { id: string, name: stri
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="role" className="text-right">
-                            Role
+                            Rola
                         </Label>
                         <Select name="role" required>
                             <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Select role" />
+                                <SelectValue placeholder="Wybierz rolę" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="manager">Manager</SelectItem>
+                                    <SelectItem value="admin">Administrator</SelectItem>
+                                    <SelectItem value="manager">Kierownik</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="branch_id" className="text-right">
-                            Branch
+                            Oddział
                         </Label>
                         <Select name="branch_id">
                             <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Select branch (optional)" />
+                                <SelectValue placeholder="Wybierz oddział (opcjonalne)" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
@@ -142,7 +142,7 @@ export function AddUserDialog({ branches }: { branches: { id: string, name: stri
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={isLoading}>
-                            {isLoading ? 'Creating...' : 'Create User'}
+                            {isLoading ? 'Tworzenie...' : 'Utwórz użytkownika'}
                         </Button>
                     </DialogFooter>
                 </form>

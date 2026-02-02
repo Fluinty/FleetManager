@@ -8,24 +8,71 @@ import { subMonths, startOfMonth, format, isAfter } from 'date-fns'
 export default async function DashboardPage() {
   const supabase = await createClient()
 
+  // Get current user and their profile
+  const { data: { user } } = await supabase.auth.getUser()
+  let userBranchCode: string | null = null
+  let isAdmin = true
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, branch_id')
+      .eq('id', user.id)
+      .single()
+
+    isAdmin = profile?.role === 'admin'
+
+    // If manager, get their branch code
+    if (profile?.role === 'manager' && profile?.branch_id) {
+      const { data: branch } = await supabase
+        .from('branches')
+        .select('code')
+        .eq('id', profile.branch_id)
+        .single()
+      userBranchCode = branch?.code || null
+    }
+  }
+
   // 1. Fetch Summary Counts
   const { count: vehicleCount } = await supabase
     .from('vehicles')
     .select('*', { count: 'estimated', head: true })
     .eq('is_active', true)
 
-  const { count: pendingOrdersCount } = await supabase
+  // Pending orders count - filtered by branch for managers
+  let pendingOrdersQuery = supabase
     .from('unresolved_pending_orders')
     .select('*', { count: 'estimated', head: true })
 
+  if (!isAdmin && userBranchCode) {
+    pendingOrdersQuery = pendingOrdersQuery.eq('branch_code', userBranchCode)
+  }
 
 
-  // Active vehicles for dropdown
-  const { data: activeVehicles } = await supabase
+  const { count: pendingOrdersCount } = await pendingOrdersQuery
+
+
+
+  // Active vehicles for dropdown - filtered by branch for managers
+  let vehiclesQuery = supabase
     .from('vehicles')
-    .select('id, plate_number')
+    .select('id, plate_number, branch_id')
     .eq('is_active', true)
     .order('plate_number', { ascending: true })
+
+  if (!isAdmin && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('branch_id')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.branch_id) {
+      vehiclesQuery = vehiclesQuery.eq('branch_id', profile.branch_id)
+    }
+  }
+
+  const { data: activeVehicles } = await vehiclesQuery
 
   const { count: activeAlertsCount } = await supabase
     .from('budget_alerts')
@@ -112,12 +159,18 @@ export default async function DashboardPage() {
     .slice(0, 10)
 
 
-  // 3. Fetch Recent Pending Items
-  const { data: recentPendingItems } = await supabase
+  // 3. Fetch Recent Pending Items - filtered by branch for managers
+  let recentPendingQuery = supabase
     .from('unresolved_pending_items')
     .select('*')
     .order('order_date', { ascending: false })
     .limit(5)
+
+  if (!isAdmin && userBranchCode) {
+    recentPendingQuery = recentPendingQuery.eq('branch_code', userBranchCode)
+  }
+
+  const { data: recentPendingItems } = await recentPendingQuery
 
 
   return (

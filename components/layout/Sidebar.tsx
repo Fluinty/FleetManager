@@ -12,7 +12,7 @@ const navigation = [
     { name: "Zamówienia", href: "/orders", icon: ShoppingCart },
     { name: "Do weryfikacji", href: "/pending", icon: AlertTriangle },
     { name: "Statystyki", href: "/statistics", icon: BarChart3 },
-    { name: "Alerty", href: "/alerts", icon: Bell },
+    { name: "Alerty", href: "/alerts", icon: Bell, adminOnly: true },
 ]
 
 interface SidebarProps {
@@ -88,45 +88,48 @@ export function Sidebar({ userEmail, userRole }: SidebarProps) {
                 {/* Mobile: Add top padding to account for header */}
                 <div className="h-20 md:hidden" />
 
+
                 {/* Navigation */}
                 <nav className="flex-1 px-4 py-8 space-y-1 overflow-y-auto custom-scrollbar">
-                    {navigation.map((item, index) => {
-                        const isActive = pathname === item.href
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={cn(
-                                    "group relative flex items-center px-4 py-3.5 text-sm font-medium rounded-2xl transition-all duration-300",
-                                    "animate-fade-in",
-                                    isActive
-                                        ? "text-teal-700 bg-teal-50/80"
-                                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                                )}
-                                style={{ animationDelay: `${index * 50}ms` }}
-                            >
-                                {/* Active State Indicator Line */}
-                                {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-teal-500 rounded-r-full shadow-sm" />
-                                )}
-
-                                <item.icon
+                    {navigation
+                        .filter(item => !item.adminOnly || userRole === 'admin')
+                        .map((item, index) => {
+                            const isActive = pathname === item.href
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
                                     className={cn(
-                                        "mr-3.5 h-5 w-5 flex-shrink-0 transition-transform duration-300",
+                                        "group relative flex items-center px-4 py-3.5 text-sm font-medium rounded-2xl transition-all duration-300",
+                                        "animate-fade-in",
                                         isActive
-                                            ? "text-teal-600 scale-105 drop-shadow-sm"
-                                            : "text-slate-500 group-hover:text-slate-700 group-hover:scale-105"
+                                            ? "text-teal-700 bg-teal-50/80"
+                                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                                     )}
-                                    aria-hidden="true"
-                                />
-                                {item.name}
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
+                                    {/* Active State Indicator Line */}
+                                    {isActive && (
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-teal-500 rounded-r-full shadow-sm" />
+                                    )}
 
-                                {isActive && (
-                                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-500 shadow-sm" />
-                                )}
-                            </Link>
-                        )
-                    })}
+                                    <item.icon
+                                        className={cn(
+                                            "mr-3.5 h-5 w-5 flex-shrink-0 transition-transform duration-300",
+                                            isActive
+                                                ? "text-teal-600 scale-105 drop-shadow-sm"
+                                                : "text-slate-500 group-hover:text-slate-700 group-hover:scale-105"
+                                        )}
+                                        aria-hidden="true"
+                                    />
+                                    {item.name}
+
+                                    {isActive && (
+                                        <div className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-500 shadow-sm" />
+                                    )}
+                                </Link>
+                            )
+                        })}
                 </nav>
 
                 {/* Footer Section */}
