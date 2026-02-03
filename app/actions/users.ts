@@ -30,7 +30,7 @@ export async function createUser(prevState: any, formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const role = formData.get('role') as string
-    const branch_id = formData.get('branch_id') as string // optional
+    const branchIdsString = formData.get('branch_ids') as string // comma-separated
 
     if (!email || !password || !role) {
         return { message: 'Missing required fields', success: false }
@@ -38,12 +38,6 @@ export async function createUser(prevState: any, formData: FormData) {
 
     try {
         // 3. Create User in Auth
-        // We use a separate client instance logic OR just use `admin.createUser` if we had service key.
-        // Since we don't have service key, we use `signUp` but we must be careful not to overwrite the session.
-        // However, `supabase.auth.signUp` in `ssr` client might attempt to set cookies.
-        // We will construct a vanilla supabase-js client with the ANON key for the sign up part,
-        // ensuring no cookies are passed/set for THIS operation's persistence.
-
         const { createClient: createVanillaClient } = await import('@supabase/supabase-js')
         const tempClient = createVanillaClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,7 +45,7 @@ export async function createUser(prevState: any, formData: FormData) {
             {
                 auth: {
                     autoRefreshToken: false,
-                    persistSession: false // IMPORTANT: Do not persist session
+                    persistSession: false
                 }
             }
         )
@@ -69,21 +63,36 @@ export async function createUser(prevState: any, formData: FormData) {
             return { message: 'Failed to create user (no user returned)', success: false }
         }
 
-        // 4. Create Profile
-        // We use the ORIGINAL (admin-authenticated) client to call the RPC
-        const branchIdValue = branch_id && branch_id !== 'none' ? branch_id : null
-
+        // 4. Create Profile (without branch_id - deprecated)
         const { error: profileError } = await supabase.rpc('create_user_profile', {
             p_user_id: newUser.user.id,
             p_role: role,
-            p_branch_id: branchIdValue
+            p_branch_id: null // Not used anymore
         })
 
         if (profileError) {
-            // Cleanup: consistency is hard here without transaction, but auth user is created.
-            // Admin can try again or we can try to delete.
-            // For now, return error.
             return { message: `User created but profile failed: ${profileError.message}`, success: false }
+        }
+
+        // 5. If manager, assign branches via manager_branches table
+        if (role === 'manager' && branchIdsString) {
+            const branchIds = branchIdsString.split(',').filter(id => id.trim())
+
+            if (branchIds.length > 0) {
+                const branchAssignments = branchIds.map(branchId => ({
+                    profile_id: newUser.user!.id,
+                    branch_id: branchId.trim(),
+                    assigned_by: currentUser.id
+                }))
+
+                const { error: assignError } = await supabase
+                    .from('manager_branches')
+                    .insert(branchAssignments)
+
+                if (assignError) {
+                    return { message: `User created but branch assignment failed: ${assignError.message}`, success: false }
+                }
+            }
         }
 
         revalidatePath('/settings')

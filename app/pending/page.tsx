@@ -6,26 +6,26 @@ export default async function PendingPage() {
 
     // Get current user and their profile
     const { data: { user } } = await supabase.auth.getUser()
-    let userBranchCode: string | null = null
+    let userBranchIds: string[] = []
     let isAdmin = true
 
     if (user) {
         const { data: profile } = await supabase
             .from('profiles')
-            .select('role, branch_id')
+            .select('role')
             .eq('id', user.id)
             .single()
 
         isAdmin = profile?.role === 'admin'
 
-        // If manager, get their branch code
-        if (profile?.role === 'manager' && profile?.branch_id) {
-            const { data: branch } = await supabase
-                .from('branches')
-                .select('code')
-                .eq('id', profile.branch_id)
-                .single()
-            userBranchCode = branch?.code || null
+        // If manager, get their branch IDs from manager_branches table
+        if (profile?.role === 'manager') {
+            const { data: managerBranches } = await supabase
+                .from('manager_branches')
+                .select('branch_id')
+                .eq('profile_id', user.id)
+
+            userBranchIds = managerBranches?.map(mb => mb.branch_id) || []
         }
     }
 
@@ -35,8 +35,8 @@ export default async function PendingPage() {
         .select('*')
         .order('order_date', { ascending: false })
 
-    if (!isAdmin && userBranchCode) {
-        pendingQuery = pendingQuery.eq('branch_code', userBranchCode)
+    if (!isAdmin && userBranchIds.length > 0) {
+        pendingQuery = pendingQuery.in('branch_id', userBranchIds)
     }
 
     const { data: pendingItems } = await pendingQuery
@@ -48,16 +48,8 @@ export default async function PendingPage() {
         .eq('is_active', true)
         .order('plate_number', { ascending: true })
 
-    if (!isAdmin && user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('branch_id')
-            .eq('id', user.id)
-            .single()
-
-        if (profile?.branch_id) {
-            vehiclesQuery = vehiclesQuery.eq('branch_id', profile.branch_id)
-        }
+    if (!isAdmin && userBranchIds.length > 0) {
+        vehiclesQuery = vehiclesQuery.in('branch_id', userBranchIds)
     }
 
     const { data: vehicles } = await vehiclesQuery

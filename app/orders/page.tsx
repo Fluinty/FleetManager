@@ -81,24 +81,12 @@ export default async function OrdersPage({
 
     const { data: branches } = await supabase.from('branches').select('id, name').order('name')
 
-    // Fetch vehicles for assignment - filtered by branch for managers
+    // Fetch vehicles for assignment
     let vehiclesQuery = supabase
         .from('vehicles')
         .select('id, plate_number, branch_id')
         .eq('is_active', true)
         .order('plate_number', { ascending: true })
-
-    if (!isAdmin && user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('branch_id')
-            .eq('id', user.id)
-            .single()
-
-        if (profile?.branch_id) {
-            vehiclesQuery = vehiclesQuery.eq('branch_id', profile.branch_id)
-        }
-    }
 
     const { data: vehicles } = await vehiclesQuery
 

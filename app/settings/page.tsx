@@ -35,10 +35,18 @@ export default async function SettingsPage() {
         ? supabase.from('branches').select('id, name').order('name')
         : Promise.resolve({ data: [] })
 
-    const [settingsRes, usersRes, branchesRes] = await Promise.all([
+    // Fetch manager branch assignments
+    const managerBranchesPromise = isAdmin
+        ? supabase
+            .from('manager_branches')
+            .select('profile_id, branches(name)')
+        : Promise.resolve({ data: [] })
+
+    const [settingsRes, usersRes, branchesRes, managerBranchesRes] = await Promise.all([
         settingsPromise,
         usersPromise,
-        branchesPromise
+        branchesPromise,
+        managerBranchesPromise
     ])
 
     // Parse Settings
@@ -46,6 +54,23 @@ export default async function SettingsPage() {
     const currentLimit = setting?.value && typeof setting.value === 'object' && 'amount' in setting.value
         ? (setting.value as { amount: number }).amount
         : 0
+
+    // Map branch assignments to users
+    const branchAssignmentsByUser = (managerBranchesRes.data || []).reduce((acc: any, mb: any) => {
+        if (!acc[mb.profile_id]) {
+            acc[mb.profile_id] = []
+        }
+        if (mb.branches?.name) {
+            acc[mb.profile_id].push(mb.branches.name)
+        }
+        return acc
+    }, {})
+
+    // Transform users data to include assigned branches
+    const transformedUsers = (usersRes.data || []).map((user: any) => ({
+        ...user,
+        assigned_branches: branchAssignmentsByUser[user.id] || []
+    }))
 
     return (
         <div className="flex-1 space-y-4">
@@ -68,7 +93,7 @@ export default async function SettingsPage() {
                 {isAdmin && (
                     <TabsContent value="users" className="space-y-4">
                         <UsersList
-                            users={usersRes.data || []}
+                            users={transformedUsers}
                             branches={branchesRes.data || []}
                         />
                     </TabsContent>

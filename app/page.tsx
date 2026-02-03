@@ -10,26 +10,26 @@ export default async function DashboardPage() {
 
   // Get current user and their profile
   const { data: { user } } = await supabase.auth.getUser()
-  let userBranchCode: string | null = null
+  let userBranchIds: string[] = []
   let isAdmin = true
 
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, branch_id')
+      .select('role')
       .eq('id', user.id)
       .single()
 
     isAdmin = profile?.role === 'admin'
 
-    // If manager, get their branch code
-    if (profile?.role === 'manager' && profile?.branch_id) {
-      const { data: branch } = await supabase
-        .from('branches')
-        .select('code')
-        .eq('id', profile.branch_id)
-        .single()
-      userBranchCode = branch?.code || null
+    // If manager, get their branch IDs from manager_branches table
+    if (profile?.role === 'manager') {
+      const { data: managerBranches } = await supabase
+        .from('manager_branches')
+        .select('branch_id')
+        .eq('profile_id', user.id)
+
+      userBranchIds = managerBranches?.map(mb => mb.branch_id) || []
     }
   }
 
@@ -44,8 +44,8 @@ export default async function DashboardPage() {
     .from('unresolved_pending_orders')
     .select('*', { count: 'estimated', head: true })
 
-  if (!isAdmin && userBranchCode) {
-    pendingOrdersQuery = pendingOrdersQuery.eq('branch_code', userBranchCode)
+  if (!isAdmin && userBranchIds.length > 0) {
+    pendingOrdersQuery = pendingOrdersQuery.in('branch_id', userBranchIds)
   }
 
 
@@ -60,16 +60,8 @@ export default async function DashboardPage() {
     .eq('is_active', true)
     .order('plate_number', { ascending: true })
 
-  if (!isAdmin && user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('branch_id')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.branch_id) {
-      vehiclesQuery = vehiclesQuery.eq('branch_id', profile.branch_id)
-    }
+  if (!isAdmin && userBranchIds.length > 0) {
+    vehiclesQuery = vehiclesQuery.in('branch_id', userBranchIds)
   }
 
   const { data: activeVehicles } = await vehiclesQuery
@@ -83,23 +75,35 @@ export default async function DashboardPage() {
   const sixMonthsAgo = format(subMonths(new Date(), 6), 'yyyy-MM-dd')
   const startOfCurrentMonth = format(startOfMonth(new Date()), 'yyyy-MM-dd')
 
-  const { data: orders } = await supabase
+  let ordersQuery = supabase
     .from('orders')
-    .select('total_gross, order_date, branch_code, branches(name)')
+    .select('total_gross, order_date, branch_code, branch_id, branches(name)')
     .gte('order_date', sixMonthsAgo)
 
+  if (!isAdmin && userBranchIds.length > 0) {
+    ordersQuery = ordersQuery.in('branch_id', userBranchIds)
+  }
+
+  const { data: orders } = await ordersQuery
+
   // Fetch order items with vehicle info for Top Vehicles calculation
-  const { data: orderItems } = await supabase
+  let orderItemsQuery = supabase
     .from('order_items')
     .select(`
       id,
       total_gross,
       vehicle_id,
-      orders!inner(order_date, branch_code, branches(name)),
+      orders!inner(order_date, branch_code, branch_id, branches(name)),
       vehicles(id, plate_number, brand, model)
     `)
     .not('vehicle_id', 'is', null)
     .gte('orders.order_date', startOfCurrentMonth)
+
+  if (!isAdmin && userBranchIds.length > 0) {
+    orderItemsQuery = orderItemsQuery.in('orders.branch_id', userBranchIds)
+  }
+
+  const { data: orderItems } = await orderItemsQuery
 
   // Calculate Total Orders this month
   const totalOrdersAmount = orders
@@ -166,8 +170,8 @@ export default async function DashboardPage() {
     .order('order_date', { ascending: false })
     .limit(5)
 
-  if (!isAdmin && userBranchCode) {
-    recentPendingQuery = recentPendingQuery.eq('branch_code', userBranchCode)
+  if (!isAdmin && userBranchIds.length > 0) {
+    recentPendingQuery = recentPendingQuery.in('branch_id', userBranchIds)
   }
 
   const { data: recentPendingItems } = await recentPendingQuery

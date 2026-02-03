@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Car, ShoppingCart, AlertTriangle, Bell, Settings, BarChart3, LogOut, User, Sparkles, Menu, X } from "lucide-react"
+import { LayoutDashboard, Car, ShoppingCart, AlertTriangle, Bell, Settings, BarChart3, LogOut, User, Sparkles, Menu, X, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { logout } from "@/app/login/actions"
 import { useState, useEffect } from "react"

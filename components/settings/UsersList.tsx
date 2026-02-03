@@ -40,7 +40,19 @@ export function UsersList({ users, branches }: { users: any[], branches: any[] }
                                         <Badge variant="outline">{user.role}</Badge>
                                     </TableCell>
                                     <TableCell>
-                                        {branches.find(b => b.id === user.branch_id)?.name || '-'}
+                                        {user.role === 'admin' ? (
+                                            <span className="text-muted-foreground text-sm">Wszystkie</span>
+                                        ) : user.assigned_branches && user.assigned_branches.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1">
+                                                {user.assigned_branches.map((branchName: string, idx: number) => (
+                                                    <Badge key={idx} variant="outline" className="text-xs">
+                                                        {branchName}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground text-sm">-</span>
+                                        )}
                                     </TableCell>
                                     <TableCell>
                                         <ChangePasswordDialog userId={user.id} userEmail={user.email} />
