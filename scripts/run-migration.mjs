@@ -9,9 +9,17 @@ const __dirname = dirname(__filename)
 // Use environment variable instead of hardcoded connection string
 const DATABASE_URL = process.env.DATABASE_URL
 
+
 async function runMigration() {
-  console.log('🔧 Connecting to TEST database...')
-  console.log('   URL: db.avjpogbqszwqghbysyzu.supabase.co\n')
+  if (!DATABASE_URL) {
+    console.error('❌ Error: DATABASE_URL environment variable is required')
+    console.log('\n💡 Set it in your .env.local file or pass it as:')
+    console.log('   DATABASE_URL="postgresql://..." node scripts/run-migration.mjs\n')
+    process.exit(1)
+  }
+
+  console.log('🔧 Connecting to database...')
+  console.log('   (using DATABASE_URL from environment)\n')
 
   const client = new pg.Client({ connectionString: DATABASE_URL })
 

@@ -7,6 +7,13 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 async function verifyMigration() {
     console.log('🔍 Verifying migration status...\n')
 
+    if (!SUPABASE_SERVICE_KEY) {
+        console.error('❌ Error: SUPABASE_SERVICE_ROLE_KEY environment variable is required')
+        console.log('\n💡 Set it in your .env.local file or pass it as:')
+        console.log('   SUPABASE_SERVICE_ROLE_KEY="sb_..." node scripts/verify-migration.mjs\n')
+        process.exit(1)
+    }
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
     try {
