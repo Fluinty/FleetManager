@@ -2,7 +2,15 @@
 
 ## 🚀 Quick Start
 1.  **Switch to Staging**: Ensure your `.env.local` matches values from `.env.staging`.
-2.  **Run App**: `npm run dev`
+2.  **Run App**: `npm run dev` or `npm run dev:staging` (auto-loads staging env)
+
+---
+
+## 🔐 Staging Test Accounts
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@test.pl` | `admin1234` |
 
 ---
 

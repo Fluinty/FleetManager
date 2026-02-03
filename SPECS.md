@@ -1,6 +1,6 @@
 # Art-Tim Fleet Manager - Project Specification
 
-> **Evergreen Documentation** | Last Updated: January 2026
+> **Evergreen Documentation** | Last Updated: February 2026
 
 ---
 
@@ -98,6 +98,12 @@ A dashboard that:
 - Configurable monthly budget limit per vehicle
 - Stored in `system_settings` table
 
+### 3.8 Statistics (`/statistics`)
+
+- Branch-level statistics and comparisons
+- Fleet-wide metrics and trends
+- Visual data breakdowns
+
 ---
 
 ## 4. Technology Stack
@@ -165,9 +171,9 @@ flowchart TB
 
     subgraph Views
         V1[vehicle_monthly_spending]
-        V2[unresolved_pending_orders]
-        V3[vehicles_over_budget]
-        V4[branch_statistics]
+        V2[unresolved_pending_items]
+        V3[unresolved_pending_orders]
+        V4[vehicles_over_budget]
         V5[vehicle_order_history]
     end
 
@@ -187,7 +193,7 @@ flowchart TB
 1. **n8n Daily Sync** → Fetches invoices from InterCars API
 2. **AI Extraction** → GPT-4o-mini extracts plate numbers from comments  
 3. **Plate Matching** → System matches to `vehicles` table
-4. **Pending Queue** → Unmatched orders go to `pending_orders`
+4. **Pending Queue** → Unmatched items tracked via `unresolved_pending_items` view
 5. **Manual Resolution** → Fleet manager assigns vehicles via UI
 6. **Budget Monitoring** → System checks against `monthly_budget_limit`
 
@@ -201,10 +207,9 @@ flowchart TB
 erDiagram
     branches ||--o{ vehicles : "has"
     branches ||--o{ orders : "has"
-    vehicles ||--o{ orders : "receives"
+    vehicles ||--o{ order_items : "receives"
     vehicles ||--o{ budget_alerts : "triggers"
     orders ||--o{ order_items : "contains"
-    orders ||--o| pending_orders : "may have"
 
     branches {
         uuid id PK
@@ -263,16 +268,8 @@ erDiagram
         text resolved_by
     }
 
-    pending_orders {
-        uuid id PK
-        uuid order_id FK
-        text error_type
-        text raw_comment
-        boolean resolved
-        timestamp resolved_at
-        text resolved_by
-        text resolved_plate
-    }
+    %% Note: pending_orders is implemented as view 'unresolved_pending_orders'
+    %% Resolution tracking is done via order_items.resolved fields
 
     budget_alerts {
         uuid id PK
@@ -296,7 +293,7 @@ erDiagram
 | `vehicles`        | Fleet vehicle registry              | 148    |
 | `orders`          | Parts orders from InterCars         | Dynamic |
 | `order_items`     | Line items within orders            | Dynamic |
-| `pending_orders`  | Orders requiring plate verification | Dynamic |
+| *(view)*          | See views below for pending items   | n/a     |
 | `budget_alerts`   | Spending threshold violations       | Dynamic |
 | `sync_log`        | n8n sync history                    | Dynamic |
 | `system_settings` | App configuration (budget limit)    | 1      |
@@ -307,10 +304,9 @@ erDiagram
 | View                       | Purpose                                |
 | -------------------------- | -------------------------------------- |
 | `vehicle_monthly_spending` | Monthly spending aggregated by vehicle (from order_items) |
-| `unresolved_pending_items` | **NEW** - Items requiring plate verification |
-| `unresolved_pending_orders`| Orders with pending items (backward compat) |
+| `unresolved_pending_items` | Items requiring plate verification (243 pending) |
+| `unresolved_pending_orders`| Orders with pending items (groups by order) |
 | `vehicles_over_budget`     | Vehicles exceeding monthly limit       |
-| `branch_statistics`        | Per-branch summary metrics             |
 | `vehicle_order_history`    | Last 12 months orders with details     |
 
 > **Note**: Vehicle spending is now tracked at the **order item level**. Each item can be assigned to a different vehicle. If `order_items.vehicle_id` is NULL, it inherits from `orders.vehicle_id`.
@@ -336,6 +332,7 @@ art-tim/
 │   ├── pending/page.tsx
 │   ├── settings/page.tsx
 │   ├── spending/page.tsx
+│   ├── statistics/page.tsx   # Branch statistics
 │   ├── vehicles/
 │   │   ├── page.tsx
 │   │   └── [id]/page.tsx
@@ -350,6 +347,8 @@ art-tim/
 │   ├── pending/              # Pending queue components
 │   ├── alerts/               # Alert components
 │   ├── settings/             # Settings form
+│   ├── spending/             # Spending reports
+│   ├── statistics/           # Statistics components
 │   └── ui/                   # Reusable UI primitives
 ├── utils/
 │   ├── supabase/             # Supabase client setup
@@ -369,8 +368,8 @@ art-tim/
 
 | Aspect            | Implementation                                    |
 | ----------------- | ------------------------------------------------- |
-| **Theme**         | Dark mode with glassmorphism                      |
-| **Colors**        | Purple/pink gradient accents on dark backgrounds |
+| **Theme**         | Light mode with glassmorphism (dark mode removed) |
+| **Colors**        | Premium light palette with gradient accents       |
 | **Typography**    | Inter font family                                 |
 | **Icons**         | Lucide React                                      |
 | **Responsive**    | Mobile-first, tablet-optimized for field use      |

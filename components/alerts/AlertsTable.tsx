@@ -9,12 +9,22 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/utils/format"
 import { Button } from "@/components/ui/button"
 import { CheckCircle } from "lucide-react"
 import { acknowledgeAlert } from "@/app/actions/acknowledge-alert"
 import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
+
+// Alert type labels in Polish with corresponding badge variants
+const ALERT_TYPE_CONFIG: Record<string, { label: string; variant: "destructive" | "warning" | "default" }> = {
+    budget_exceeded: { label: "Budżet przekroczony", variant: "destructive" },
+}
+
+function getAlertTypeLabel(alertType: string) {
+    return ALERT_TYPE_CONFIG[alertType] || { label: alertType, variant: "default" as const }
+}
 
 interface Alert {
     id: string
@@ -92,9 +102,11 @@ export function AlertsTable({ alerts }: { alerts: Alert[] }) {
                                                 : "Pojazd usunięty"}
                                         </Link>
                                     </TableCell>
-                                    <TableCell className="text-red-700 font-bold">
+                                    <TableCell>
                                         <Link href={`/vehicles/${alert.vehicle_id}`} className="block w-full">
-                                            {alert.alert_type}
+                                            <Badge variant={getAlertTypeLabel(alert.alert_type).variant}>
+                                                {getAlertTypeLabel(alert.alert_type).label}
+                                            </Badge>
                                         </Link>
                                     </TableCell>
                                     <TableCell className="text-right">
