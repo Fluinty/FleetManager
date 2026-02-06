@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/utils/format"
+import { AirportStatusSelect } from "./AirportStatusSelect"
 
 interface VehicleInfoProps {
     vehicle: any // Typed lazily for speed, ideally proper Supabase type
@@ -50,7 +51,10 @@ export function VehicleInfo({ vehicle, branchName }: VehicleInfoProps) {
                     )}
                     <div>
                         <p className="text-muted-foreground">Lotnisko</p>
-                        <p className="font-medium">{vehicle.is_airport ? "Tak" : "Nie"}</p>
+                        <AirportStatusSelect
+                            vehicleId={vehicle.id}
+                            initialValue={vehicle.is_airport}
+                        />
                     </div>
                 </div>
             </CardContent>
