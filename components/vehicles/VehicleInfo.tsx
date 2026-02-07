@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/utils/format"
 import { AirportStatusSelect } from "./AirportStatusSelect"
 import { BranchSelect } from "./BranchSelect"
+import { ExternalLink } from "lucide-react"
 
 interface VehicleInfoProps {
     vehicle: any // Typed lazily for speed, ideally proper Supabase type
@@ -38,12 +39,44 @@ export function VehicleInfo({ vehicle, branchName, availableBranches }: VehicleI
                         <p className="font-medium">{vehicle.engine_capacity} cm³</p>
                     </div>
                     <div>
+                        <p className="text-muted-foreground">Ubezpieczenie</p>
+                        <p className="font-medium">{formatDate(vehicle.next_insurance_date)}</p>
+                    </div>
+                    <div>
+                        <p className="text-muted-foreground">Polisa</p>
+                        {vehicle.insurance_document_url ? (
+                            <a
+                                href={vehicle.insurance_document_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 font-medium"
+                            >
+                                Zobacz dokument
+                                <ExternalLink className="h-3 w-3" />
+                            </a>
+                        ) : (
+                            <p className="font-medium text-muted-foreground">BRAK</p>
+                        )}
+                    </div>
+                    <div>
                         <p className="text-muted-foreground">Przegląd</p>
                         <p className="font-medium">{formatDate(vehicle.next_inspection_date)}</p>
                     </div>
                     <div>
-                        <p className="text-muted-foreground">Ubezpieczenie</p>
-                        <p className="font-medium">{formatDate(vehicle.next_insurance_date)}</p>
+                        <p className="text-muted-foreground">Dokument przeglądu</p>
+                        {vehicle.inspection_document_url ? (
+                            <a
+                                href={vehicle.inspection_document_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 font-medium"
+                            >
+                                Zobacz dokument
+                                <ExternalLink className="h-3 w-3" />
+                            </a>
+                        ) : (
+                            <p className="font-medium text-muted-foreground">BRAK</p>
+                        )}
                     </div>
                     <div>
                         <p className="text-muted-foreground">Leasing</p>
