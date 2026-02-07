@@ -10,6 +10,7 @@ interface PageProps {
 }
 
 import { AddInvoiceModal } from '@/components/vehicles/AddInvoiceModal'
+import { getUserBranches } from '@/app/actions/vehicles'
 
 export default async function VehicleDetailsPage({ params }: PageProps) {
     const supabase = await createClient()
@@ -82,6 +83,9 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
         ? vehicle.branches[0]?.name
         : vehicle.branches?.name
 
+    // Fetch branches user has access to
+    const availableBranches = await getUserBranches()
+
     return (
         <div className="flex-1 space-y-4">
             <div className="flex items-center justify-between">
@@ -96,7 +100,11 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-3">
-                    <VehicleInfo vehicle={vehicle} branchName={branchName} />
+                    <VehicleInfo
+                        vehicle={vehicle}
+                        branchName={branchName}
+                        availableBranches={availableBranches}
+                    />
                 </div>
                 <div className="col-span-4">
                     <ExpensesChart data={expensesData} />

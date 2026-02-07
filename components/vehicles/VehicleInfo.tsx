@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/utils/format"
 import { AirportStatusSelect } from "./AirportStatusSelect"
+import { BranchSelect } from "./BranchSelect"
 
 interface VehicleInfoProps {
     vehicle: any // Typed lazily for speed, ideally proper Supabase type
     branchName?: string
+    availableBranches: { id: string; name: string }[]
 }
 
-export function VehicleInfo({ vehicle, branchName }: VehicleInfoProps) {
+export function VehicleInfo({ vehicle, branchName, availableBranches }: VehicleInfoProps) {
     return (
         <Card className="h-full">
             <CardHeader>
@@ -17,7 +19,11 @@ export function VehicleInfo({ vehicle, branchName }: VehicleInfoProps) {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                         <p className="text-muted-foreground">Oddział</p>
-                        <p className="font-medium">{branchName || "-"}</p>
+                        <BranchSelect
+                            vehicleId={vehicle.id}
+                            currentBranchId={vehicle.branch_id}
+                            availableBranches={availableBranches}
+                        />
                     </div>
                     <div>
                         <p className="text-muted-foreground">Status</p>

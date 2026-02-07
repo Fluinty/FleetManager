@@ -60,3 +60,94 @@ export async function updateVehicleAirportStatus(
         }
     }
 }
+
+/**
+ * Updates the branch (city) for a vehicle
+ * @param vehicleId - UUID of the vehicle
+ * @param newBranchId - UUID of the target branch
+ * @returns Success status and redirect flag
+ */
+export async function updateVehicleBranch(
+    vehicleId: string,
+    newBranchId: string
+) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, error: 'Nie zalogowano' }
+        }
+
+        console.log('[BRANCH UPDATE] Attempting to transfer vehicle:', vehicleId, 'to branch:', newBranchId)
+
+        // Update vehicle branch (RLS will handle access control on read)
+        // Manager can transfer to any branch, but may lose access after transfer
+        const { data, error } = await supabase
+            .from('vehicles')
+            .update({
+                branch_id: newBranchId,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', vehicleId)
+            .select()
+
+        console.log('[BRANCH UPDATE] Result:', { data, error })
+
+        if (error) {
+            console.error('[BRANCH UPDATE ERROR]', error)
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        if (!data || data.length === 0) {
+            console.error('[BRANCH UPDATE] No rows updated - possible RLS issue')
+            return {
+                success: false,
+                error: 'Nie udało się zaktualizować pojazdu'
+            }
+        }
+
+        console.log('[BRANCH UPDATE SUCCESS] Vehicle transferred to new branch')
+
+        // Revalidate both pages
+        revalidatePath('/vehicles')
+        revalidatePath('/')
+
+        return { success: true, shouldRedirect: true }
+    } catch (error) {
+        console.error('[BRANCH UPDATE] Unexpected error:', error)
+        return {
+            success: false,
+            error: 'Wystąpił nieoczekiwany błąd'
+        }
+    }
+}
+
+/**
+ * Gets list of branches that the current user has access to
+ * @returns Array of branches user can assign vehicles to
+ */
+export async function getUserBranches() {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) return []
+
+        // Everyone sees all active branches
+        // Managers can transfer to any branch, but RLS will filter access on read
+        const { data } = await supabase
+            .from('branches')
+            .select('id, name')
+            .eq('is_active', true)
+            .order('name')
+
+        return data || []
+    } catch (error) {
+        console.error('Error fetching user branches:', error)
+        return []
+    }
+}
