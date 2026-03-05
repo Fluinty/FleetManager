@@ -42,8 +42,16 @@ export default async function VehiclesPage({
     }
     // 'ALL' - no filter on is_active
 
+    // Fetch branches for filter
+    const { data: branches } = await supabase.from('branches').select('id, name, code').order('name')
+
     if (branch) {
-        query = query.eq('branch_id', branch)
+        const selectedBranchObj = branches?.find(b => b.id === branch)
+        if (selectedBranchObj?.code === 'NONE' || selectedBranchObj?.name?.toLowerCase() === 'nieprzypisane') {
+            query = query.or(`branch_id.eq.${branch},branch_id.is.null`)
+        } else {
+            query = query.eq('branch_id', branch)
+        }
     }
 
     if (search) {
@@ -55,9 +63,6 @@ export default async function VehiclesPage({
     query = query.order(sort, { ascending: sortDir })
 
     const { data: vehicles } = await query
-
-    // Fetch branches for filter
-    const { data: branches } = await supabase.from('branches').select('id, name').order('name')
 
     return (
         <div className="flex-1 space-y-4">
