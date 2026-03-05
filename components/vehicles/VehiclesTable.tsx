@@ -26,6 +26,8 @@ interface Vehicle {
     next_inspection_date: string | null
     next_insurance_date: string | null
     is_active: boolean | null
+    is_leasing?: boolean | null
+    leasing_end_date?: string | null
     branches?: { name: string } | { name: string }[] | null
 }
 
@@ -127,6 +129,16 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                                     <span>OC: {formatDate(vehicle.next_insurance_date)}</span>
                                 </div>
                             </div>
+                            {vehicle.is_leasing && (
+                                <div className="mt-2 text-xs text-blue-700 bg-blue-50 border border-blue-100 px-2 py-1.5 rounded-lg inline-flex items-center gap-1.5">
+                                    <span className="font-medium">Leasing</span>
+                                    {vehicle.leasing_end_date && (
+                                        <span className="opacity-80">
+                                            do {formatDate(vehicle.leasing_end_date)}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </Link>
                     )
                 })
@@ -157,6 +169,11 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                         <TableHead>
                             <Button variant="ghost" onClick={() => handleSort('next_insurance_date')} className="-ml-4 h-8">
                                 Ubezpieczenie <ArrowUpDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </TableHead>
+                        <TableHead>
+                            <Button variant="ghost" onClick={() => handleSort('is_leasing')} className="-ml-4 h-8">
+                                Leasing <ArrowUpDown className="ml-2 h-4 w-4" />
                             </Button>
                         </TableHead>
                         <TableHead className="text-right">Akcje</TableHead>
@@ -197,6 +214,20 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                                         )}>
                                             {formatDate(vehicle.next_insurance_date)}
                                         </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {vehicle.is_leasing ? (
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-blue-700">Tak</span>
+                                                {vehicle.leasing_end_date && (
+                                                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                        do {formatDate(vehicle.leasing_end_date)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground">Nie</span>
+                                        )}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="outline" size="sm" asChild>

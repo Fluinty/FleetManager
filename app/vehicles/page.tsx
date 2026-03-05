@@ -33,7 +33,7 @@ export default async function VehiclesPage({
     // Build query
     let query = supabase
         .from('vehicles')
-        .select('id, plate_number, brand, model, production_year, branch_id, next_inspection_date, next_insurance_date, is_active, branches(name)')
+        .select('id, plate_number, brand, model, production_year, branch_id, next_inspection_date, next_insurance_date, is_active, is_leasing, leasing_end_date, branches(name)')
 
     if (status === 'ACTIVE') {
         query = query.eq('is_active', true)

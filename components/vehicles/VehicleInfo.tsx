@@ -80,9 +80,15 @@ export function VehicleInfo({ vehicle, branchName, availableBranches }: VehicleI
                     </div>
                     <div>
                         <p className="text-muted-foreground">Leasing</p>
-                        <p className="font-medium">{vehicle.is_leasing ? "Tak" : "Nie"}</p>
+                        <p className="font-medium">
+                            {vehicle.is_leasing
+                                ? vehicle.leasing_end_date
+                                    ? `Tak (do ${formatDate(vehicle.leasing_end_date)})`
+                                    : "Tak"
+                                : "Nie"}
+                        </p>
                     </div>
-                    {vehicle.is_leasing && (
+                    {vehicle.is_leasing && vehicle.leasing_company && (
                         <div>
                             <p className="text-muted-foreground">Firma Leasingowa</p>
                             <p className="font-medium">{vehicle.leasing_company}</p>
