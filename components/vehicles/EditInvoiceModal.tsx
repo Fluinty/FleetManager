@@ -11,11 +11,9 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import {
     Select,
     SelectContent,
@@ -25,7 +23,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Plus, Trash2, FileText } from "lucide-react"
-import { addManualInvoice } from "@/app/actions/add-manual-invoice"
+import { editManualInvoice } from "@/app/actions/edit-manual-invoice"
 import { format } from "date-fns"
 
 interface InvoiceFormData {
@@ -41,9 +39,23 @@ interface InvoiceFormData {
     }>
 }
 
-interface AddInvoiceModalProps {
+interface EditInvoiceModalProps {
+    orderId: string
     vehicleId: string
-    vehiclePlate: string
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    initialData: {
+        orderDate: string
+        supplier: string
+        invoiceNumber: string
+        items: Array<{
+            name: string
+            sku: string
+            quantity: number
+            unitPriceNet: number
+            vatRate: number
+        }>
+    }
 }
 
 const VAT_RATES = [
@@ -54,9 +66,8 @@ const VAT_RATES = [
     { label: "zw.", value: 0 },
 ]
 
-export function AddInvoiceModal({ vehicleId, vehiclePlate }: AddInvoiceModalProps) {
+export function EditInvoiceModal({ orderId, vehicleId, open, onOpenChange, initialData }: EditInvoiceModalProps) {
     const router = useRouter()
-    const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const { toast } = useToast()
 
@@ -66,23 +77,9 @@ export function AddInvoiceModal({ vehicleId, vehiclePlate }: AddInvoiceModalProp
         handleSubmit,
         watch,
         setValue,
-        reset,
         formState: { errors },
     } = useForm<InvoiceFormData>({
-        defaultValues: {
-            orderDate: format(new Date(), "yyyy-MM-dd"),
-            supplier: "",
-            invoiceNumber: "",
-            items: [
-                {
-                    name: "",
-                    sku: "",
-                    quantity: 1,
-                    unitPriceNet: 0,
-                    vatRate: 23,
-                },
-            ],
-        },
+        defaultValues: initialData,
     })
 
     const { fields, append, remove } = useFieldArray({
@@ -129,7 +126,7 @@ export function AddInvoiceModal({ vehicleId, vehiclePlate }: AddInvoiceModalProp
         setLoading(true)
 
         try {
-            const result = await addManualInvoice(vehicleId, data)
+            const result = await editManualInvoice(orderId, vehicleId, data)
 
             if (result.error) {
                 toast({
@@ -140,10 +137,9 @@ export function AddInvoiceModal({ vehicleId, vehiclePlate }: AddInvoiceModalProp
             } else {
                 toast({
                     title: "Sukces",
-                    description: "Faktura została dodana.",
+                    description: "Faktura została zaktualizowana.",
                 })
-                setOpen(false)
-                reset()
+                onOpenChange(false)
                 router.refresh()
             }
         } catch (error) {
@@ -158,21 +154,15 @@ export function AddInvoiceModal({ vehicleId, vehiclePlate }: AddInvoiceModalProp
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Dodaj fakturę
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-teal-500" />
-                        Nowa faktura - {vehiclePlate}
+                        <FileText className="h-5 w-5 text-amber-500" />
+                        Edytuj fakturę - {initialData.invoiceNumber}
                     </DialogTitle>
                     <DialogDescription>
-                        Dodaj fakturę z wieloma pozycjami dla tego pojazdu
+                        Edytuj dane faktury i jej pozycje
                     </DialogDescription>
                 </DialogHeader>
 
@@ -356,9 +346,12 @@ export function AddInvoiceModal({ vehicleId, vehiclePlate }: AddInvoiceModalProp
                     </div>
 
                     <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            Anuluj
+                        </Button>
                         <Button type="submit" disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Zapisz fakturę
+                            Zapisz zmiany
                         </Button>
                     </DialogFooter>
                 </form>

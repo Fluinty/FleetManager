@@ -16,7 +16,7 @@ interface InvoiceItem {
 interface InvoiceData {
     orderDate: string
     supplier: string
-    description: string
+    invoiceNumber: string
     items: InvoiceItem[]
 }
 
@@ -69,7 +69,8 @@ export async function addManualInvoice(vehicleId: string, data: InvoiceData) {
             .from("orders")
             .insert({
                 order_date: data.orderDate,
-                description: data.description,
+                description: data.supplier,
+                fiscal_document_number: data.invoiceNumber,
                 branch_id: vehicle.branch_id,
                 total_net: Math.round(invoiceTotalNet * 100) / 100,
                 total_gross: Math.round(invoiceTotalGross * 100) / 100,
@@ -77,6 +78,7 @@ export async function addManualInvoice(vehicleId: string, data: InvoiceData) {
                 status: "completed",
                 currency: "PLN",
                 amount: Math.round(invoiceTotalGross * 100) / 100,
+                is_manual: true,
             })
             .select()
             .single()

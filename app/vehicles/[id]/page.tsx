@@ -48,10 +48,14 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
             sku,
             required_quantity,
             total_gross,
+            unit_price_net,
             orders!inner(
                 id,
                 order_date,
-                intercars_id
+                intercars_id,
+                is_manual,
+                fiscal_document_number,
+                description
             )
         `)
         .eq('vehicle_id', id)
@@ -114,7 +118,7 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
             {isAdmin && (
                 <div className="space-y-4">
                     <h3 className="text-xl font-bold tracking-tight">Przypisane Części</h3>
-                    <VehicleItemsHistory items={items || []} />
+                    <VehicleItemsHistory items={items || []} vehicleId={id} isAdmin={isAdmin} />
                 </div>
             )}
         </div>

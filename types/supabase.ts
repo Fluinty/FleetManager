@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
     | string
     | number
     | boolean
@@ -254,8 +254,10 @@ export type Database = {
                     created_at: string | null
                     currency: string | null
                     description: string | null
+                    fiscal_document_number: string | null
                     id: string
                     intercars_id: string | null
+                    is_manual: boolean
                     order_date: string
                     raw_comment: string | null
                     status: string
@@ -271,8 +273,10 @@ export type Database = {
                     created_at?: string | null
                     currency?: string | null
                     description?: string | null
+                    fiscal_document_number?: string | null
                     id?: string
                     intercars_id?: string | null
+                    is_manual?: boolean
                     order_date: string
                     raw_comment?: string | null
                     status?: string
@@ -288,8 +292,10 @@ export type Database = {
                     created_at?: string | null
                     currency?: string | null
                     description?: string | null
+                    fiscal_document_number?: string | null
                     id?: string
                     intercars_id?: string | null
+                    is_manual?: boolean
                     order_date?: string
                     raw_comment?: string | null
                     status?: string
