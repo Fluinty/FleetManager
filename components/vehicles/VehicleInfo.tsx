@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/utils/format"
 import { AirportStatusSelect } from "./AirportStatusSelect"
 import { BranchSelect } from "./BranchSelect"
-import { ExternalLink } from "lucide-react"
+import { DocumentPreviewButton } from "./DocumentPreviewButton"
 
 interface VehicleInfoProps {
     vehicle: any // Typed lazily for speed, ideally proper Supabase type
@@ -45,15 +45,10 @@ export function VehicleInfo({ vehicle, branchName, availableBranches }: VehicleI
                     <div>
                         <p className="text-muted-foreground">Polisa</p>
                         {vehicle.insurance_document_url ? (
-                            <a
-                                href={vehicle.insurance_document_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 font-medium"
-                            >
-                                Zobacz dokument
-                                <ExternalLink className="h-3 w-3" />
-                            </a>
+                            <DocumentPreviewButton
+                                url={vehicle.insurance_document_url}
+                                title={`Polisa ubezpieczeniowa — ${vehicle.plate_number}`}
+                            />
                         ) : (
                             <p className="font-medium text-muted-foreground">BRAK</p>
                         )}
@@ -65,15 +60,10 @@ export function VehicleInfo({ vehicle, branchName, availableBranches }: VehicleI
                     <div>
                         <p className="text-muted-foreground">Dokument przeglądu</p>
                         {vehicle.inspection_document_url ? (
-                            <a
-                                href={vehicle.inspection_document_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 font-medium"
-                            >
-                                Zobacz dokument
-                                <ExternalLink className="h-3 w-3" />
-                            </a>
+                            <DocumentPreviewButton
+                                url={vehicle.inspection_document_url}
+                                title={`Dokument przeglądu — ${vehicle.plate_number}`}
+                            />
                         ) : (
                             <p className="font-medium text-muted-foreground">BRAK</p>
                         )}
