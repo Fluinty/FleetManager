@@ -3,6 +3,7 @@ import { formatDate } from "@/utils/format"
 import { AirportStatusSelect } from "./AirportStatusSelect"
 import { BranchSelect } from "./BranchSelect"
 import { DocumentPreviewButton } from "./DocumentPreviewButton"
+import { FinancingSection } from "./FinancingSection"
 
 interface VehicleInfoProps {
     vehicle: any // Typed lazily for speed, ideally proper Supabase type
@@ -68,22 +69,13 @@ export function VehicleInfo({ vehicle, branchName, availableBranches }: VehicleI
                             <p className="font-medium text-muted-foreground">BRAK</p>
                         )}
                     </div>
-                    <div>
-                        <p className="text-muted-foreground">Leasing</p>
-                        <p className="font-medium">
-                            {vehicle.is_leasing
-                                ? vehicle.leasing_end_date
-                                    ? `Tak (do ${formatDate(vehicle.leasing_end_date)})`
-                                    : "Tak"
-                                : "Nie"}
-                        </p>
-                    </div>
-                    {vehicle.is_leasing && vehicle.leasing_company && (
-                        <div>
-                            <p className="text-muted-foreground">Firma Leasingowa</p>
-                            <p className="font-medium">{vehicle.leasing_company}</p>
-                        </div>
-                    )}
+                    <FinancingSection
+                        vehicleId={vehicle.id}
+                        financingType={vehicle.financing_type || "none"}
+                        company={vehicle.leasing_company}
+                        startDate={vehicle.financing_start_date}
+                        endDate={vehicle.leasing_end_date}
+                    />
                     <div>
                         <p className="text-muted-foreground">Lotnisko</p>
                         <AirportStatusSelect
