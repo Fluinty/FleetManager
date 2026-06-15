@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Car, ShoppingCart, AlertTriangle, Bell, Settings, BarChart3, LogOut, User, Sparkles, Menu, X, Users } from "lucide-react"
+import { LayoutDashboard, Car, ShoppingCart, AlertTriangle, Bell, Settings, BarChart3, LogOut, User, Sparkles, Menu, X, Users, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { logout } from "@/app/login/actions"
 import { useState, useEffect } from "react"
@@ -9,6 +9,7 @@ import { useState, useEffect } from "react"
 const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Pojazdy", href: "/vehicles", icon: Car },
+    { name: "Urządzenia", href: "/devices", icon: Wrench },
     { name: "Zamówienia", href: "/orders", icon: ShoppingCart, adminOnly: true },
     { name: "Do weryfikacji", href: "/pending", icon: AlertTriangle },
     { name: "Statystyki", href: "/statistics", icon: BarChart3, adminOnly: true },

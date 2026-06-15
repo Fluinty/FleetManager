@@ -107,6 +107,69 @@ export type Database = {
                     },
                 ]
             }
+            devices: {
+                Row: {
+                    branch_id: string | null
+                    created_at: string | null
+                    decision_expiry_date: string | null
+                    device_type: string
+                    id: string
+                    is_active: boolean | null
+                    last_inspection_date: string | null
+                    name: string | null
+                    next_inspection_date: string | null
+                    notes: string | null
+                    udt_number: string
+                    updated_at: string | null
+                    vehicle_id: string | null
+                }
+                Insert: {
+                    branch_id?: string | null
+                    created_at?: string | null
+                    decision_expiry_date?: string | null
+                    device_type: string
+                    id?: string
+                    is_active?: boolean | null
+                    last_inspection_date?: string | null
+                    name?: string | null
+                    next_inspection_date?: string | null
+                    notes?: string | null
+                    udt_number: string
+                    updated_at?: string | null
+                    vehicle_id?: string | null
+                }
+                Update: {
+                    branch_id?: string | null
+                    created_at?: string | null
+                    decision_expiry_date?: string | null
+                    device_type?: string
+                    id?: string
+                    is_active?: boolean | null
+                    last_inspection_date?: string | null
+                    name?: string | null
+                    next_inspection_date?: string | null
+                    notes?: string | null
+                    udt_number?: string
+                    updated_at?: string | null
+                    vehicle_id?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "devices_vehicle_id_fkey"
+                        columns: ["vehicle_id"]
+                        isOneToOne: false
+                        referencedRelation: "vehicles"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "devices_branch_id_fkey"
+                        columns: ["branch_id"]
+                        isOneToOne: false
+                        referencedRelation: "branches"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
             manager_branches: {
                 Row: {
                     assigned_at: string | null
@@ -450,6 +513,7 @@ export type Database = {
                     updated_at: string | null
                     updated_by: string | null
                     value: Json
+                    vehicle_category: string | null
                     vin: string | null
                 }
                 Insert: {
@@ -482,6 +546,7 @@ export type Database = {
                     updated_at?: string | null
                     updated_by?: string | null
                     value?: Json
+                    vehicle_category?: string | null
                     vin?: string | null
                 }
                 Update: {
@@ -514,6 +579,7 @@ export type Database = {
                     updated_at?: string | null
                     updated_by?: string | null
                     value?: Json
+                    vehicle_category?: string | null
                     vin?: string | null
                 }
                 Relationships: [

@@ -3,7 +3,7 @@ import { SummaryCards } from '@/components/dashboard/SummaryCards'
 import { ExpensesChart } from '@/components/dashboard/ExpensesChart'
 import { TopVehiclesTable } from '@/components/dashboard/TopVehiclesTable'
 import { RecentPendingItems } from '@/components/dashboard/RecentPendingItems'
-import { subMonths, startOfMonth, format, isAfter } from 'date-fns'
+import { subMonths, startOfMonth, format, isAfter, addDays } from 'date-fns'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -70,6 +70,21 @@ export default async function DashboardPage() {
     .from('budget_alerts')
     .select('*', { count: 'estimated', head: true })
     .eq('acknowledged', false)
+
+  // UDT alerts (next 30 days)
+  const next30Days = format(addDays(new Date(), 30), 'yyyy-MM-dd')
+  let devicesQuery = supabase
+    .from('devices')
+    .select('*', { count: 'exact', head: true })
+    .lte('next_inspection_date', next30Days)
+    .eq('is_active', true)
+
+  if (!isAdmin && userBranchIds.length > 0) {
+    devicesQuery = devicesQuery.in('branch_id', userBranchIds)
+  }
+  const { count: udtAlertsCount } = await devicesQuery
+  
+  const totalAlertsCount = (activeAlertsCount || 0) + (udtAlertsCount || 0)
 
   // 2. Fetch Orders for chart and Order Items for vehicle stats (Last 6 months)
   const sixMonthsAgo = format(subMonths(new Date(), 6), 'yyyy-MM-dd')
@@ -185,7 +200,7 @@ export default async function DashboardPage() {
         vehicleCount={vehicleCount || 0}
         totalOrdersAmount={totalOrdersAmount}
         pendingOrdersCount={pendingOrdersCount || 0}
-        activeAlertsCount={activeAlertsCount || 0}
+        activeAlertsCount={totalAlertsCount}
         isAdmin={isAdmin}
       />
 

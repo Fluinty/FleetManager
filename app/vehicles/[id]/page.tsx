@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import { VehicleInfo } from '@/components/vehicles/VehicleInfo'
 import { ExpensesChart } from '@/components/dashboard/ExpensesChart'
+import { VehicleDevices } from '@/components/vehicles/VehicleDevices'
 import { VehicleItemsHistory } from '@/components/vehicles/VehicleItemsHistory'
 import { subMonths, format } from 'date-fns'
 
@@ -38,6 +39,12 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
     if (error || !vehicle) {
         notFound()
     }
+
+    // Fetch devices for this vehicle
+    const { data: vehicleDevices } = await supabase
+        .from('devices')
+        .select('id, udt_number, device_type, next_inspection_date, last_inspection_date')
+        .eq('vehicle_id', id)
 
     // 2. Fetch Order Items assigned to this vehicle (with order info for date/intercars_id)
     const { data: items } = await supabase
@@ -96,6 +103,16 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
                 <div className="space-y-1">
                     <h2 className="text-3xl font-bold tracking-tight">{vehicle.plate_number}</h2>
                     <span className="text-muted-foreground text-sm">{vehicle.brand} {vehicle.model}</span>
+                    {vehicle.vehicle_category === 'truck' && (
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-orange-100 text-orange-700">
+                            Ciężarówka &gt;3.5t
+                        </span>
+                    )}
+                    {vehicle.vehicle_category === 'car' && (
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700">
+                            Osobówka
+                        </span>
+                    )}
                 </div>
                 {isAdmin && (
                     <AddInvoiceModal vehicleId={id} vehiclePlate={vehicle.plate_number} />
@@ -114,6 +131,10 @@ export default async function VehicleDetailsPage({ params }: PageProps) {
                     <ExpensesChart data={expensesData} />
                 </div>
             </div>
+
+            {vehicleDevices && vehicleDevices.length > 0 && (
+                <VehicleDevices devices={vehicleDevices} />
+            )}
 
             {isAdmin && (
                 <div className="space-y-4">

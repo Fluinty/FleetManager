@@ -29,6 +29,7 @@ interface Vehicle {
     is_leasing?: boolean | null
     financing_type?: string | null
     leasing_end_date?: string | null
+    vehicle_category?: string | null
     branches?: { name: string } | { name: string }[] | null
 }
 
@@ -101,6 +102,16 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                                             {vehicle.brand} {vehicle.model}
                                             {vehicle.production_year && ` (${vehicle.production_year})`}
                                         </p>
+                                        {vehicle.vehicle_category === 'truck' && (
+                                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700 w-fit">
+                                                Ciężarówka
+                                            </span>
+                                        )}
+                                        {vehicle.vehicle_category === 'car' && (
+                                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 w-fit">
+                                                Osobówka
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-slate-400" />
@@ -203,7 +214,21 @@ export function VehiclesTable({ vehicles }: { vehicles: Vehicle[] }) {
                             return (
                                 <TableRow key={vehicle.id} className={cn(!vehicle.is_active && "text-gray-500 bg-gray-50")}>
                                     <TableCell className="font-medium">{vehicle.plate_number}</TableCell>
-                                    <TableCell>{vehicle.brand}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1.5">
+                                            {vehicle.brand}
+                                            {vehicle.vehicle_category === 'truck' && (
+                                                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-700">
+                                                    Ciężarówka
+                                                </span>
+                                            )}
+                                            {vehicle.vehicle_category === 'car' && (
+                                                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600">
+                                                    Osobówka
+                                                </span>
+                                            )}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{vehicle.model}</TableCell>
                                     <TableCell>{vehicle.production_year}</TableCell>
                                     <TableCell>{branchName}</TableCell>
